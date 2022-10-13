@@ -12,8 +12,18 @@ namespace www778878net.Test
             Logger Logger = LogManager.GetCurrentClassLogger(); 
             //打出日志
             Logger.Debug("我打出了Nlog日志7788！");
+            Logger.Info("我打出了Nlog日志7788！");
+            Logger.Warn("我打出了Nlog日志7788！");
+            Logger.Error("我打出了Nlog日志7788！");
+            Log78.EventLog += Log78_EventLog;
         }
-     
+
+        private void Log78_EventLog(string leave, string info)
+        {
+             //do something
+
+        }
+
         public void TestMethod1()
         {
             //创建一个配置文件对象

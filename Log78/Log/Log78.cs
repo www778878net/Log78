@@ -12,6 +12,8 @@ namespace www778878net.Log
     /// </summary>
     public static class Log78
     {
+        public  delegate void LogHandler(string leave,string info);
+        public static event LogHandler EventLog;
         static Logger Logger;
         static Log78()
         {
@@ -40,6 +42,14 @@ namespace www778878net.Log
             Logger = LogManager.GetCurrentClassLogger();
         }
 
+        private static void OnEventLog(string leave, string message)
+        {
+            if (EventLog != null)
+            {
+                EventLog(leave,message);
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -56,6 +66,7 @@ namespace www778878net.Log
         {
             //打出日志
             Logger.Info(info);
+            OnEventLog("Info", info);
         }
 
         /// <summary>
@@ -65,6 +76,7 @@ namespace www778878net.Log
         {
             //打出日志
             Logger.Warn(info);
+            OnEventLog("Warn", info);
         }
 
         /// <summary>
@@ -74,6 +86,7 @@ namespace www778878net.Log
         {
             //打出日志
             Logger.Error(info);
+            OnEventLog("Error", info);
         }
 
         /// <summary>
@@ -83,6 +96,7 @@ namespace www778878net.Log
         {
             //打出日志
             Logger.Error(err);
+            OnEventLog("Error", err.Message);
         }
     }
 }
