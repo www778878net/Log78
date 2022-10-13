@@ -19,7 +19,7 @@
     <PackageTags>"7788";"www778878net";</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RootNamespace>www778878net</RootNamespace>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
