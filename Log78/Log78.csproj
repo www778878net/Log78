@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 
     <Deterministic>false</Deterministic>
-    <Version>0.0.1</Version>
+    <Version>0.0.1.0001</Version>
     <PackageId>Log78</PackageId>
     <Authors>Frieda.657225485@qq.com</Authors>
     <Company>www778878net</Company>

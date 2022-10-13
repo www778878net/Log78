@@ -13,7 +13,7 @@ namespace www778878net.Log
     public static class Log78
     {
         public  delegate void LogHandler(string leave,string info);
-        public static event LogHandler EventLog;
+        public static event LogHandler? EventLog;
         static Logger Logger;
         static Log78()
         {
