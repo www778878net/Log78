@@ -9,13 +9,16 @@ namespace www778878net.Test
         public void Test()
         {
             Log78.Debug("test333");
-            Logger Logger = LogManager.GetCurrentClassLogger(); 
+            Logger Logger = LogManager.GetCurrentClassLogger();
+            Log78.EventLog += Log78_EventLog;
             //打出日志
             Logger.Debug("我打出了Nlog日志7788！");
             Logger.Info("我打出了Nlog日志7788！");
             Logger.Warn("我打出了Nlog日志7788！");
             Logger.Error("我打出了Nlog日志7788！");
-            Log78.EventLog += Log78_EventLog;
+
+            int test = 1;//nothing to test
+            Assert.AreEqual(1, test);
         }
 
         private void Log78_EventLog(string leave, string info)
