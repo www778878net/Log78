@@ -1,42 +1,42 @@
 <h1 align="center">Log78</h1>
 <div align="center">
 
-[English](./README.en.md) | ¼òÌåÖĞÎÄ
+[English](./README.en.md) | ç®€ä½“ä¸­æ–‡
 
-¡¸Log78¡¹¼òµ¥·â×°NLog£¬·½±ãµ÷ÓÃ¡£
+ã€ŒLog78ã€ç®€å•å°è£…NLogï¼Œæ–¹ä¾¿è°ƒç”¨ã€‚
 
-
-[![QQÈº](https://img.shields.io/badge/QQÈº-323397913-blue.svg?style=flat-square&color=12b7f5&logo=qq)](https://qm.qq.com/cgi-bin/qm/qr?k=it9gUUVdBEDWiTOH21NsoRHAbE9IAzAO&jump_from=webapi&authKey=KQwSXEPwpAlzAFvanFURm0Foec9G9Dak0DmThWCexhqUFbWzlGjAFC7t0jrjdKdL)
+[![Build Status](https://dev.azure.com/www778878net/test/_apis/build/status/www778878net.Log78?branchName=main)](https://dev.azure.com/www778878net/test/_build/latest?definitionId=17&branchName=main)
+[![QQç¾¤](https://img.shields.io/badge/QQç¾¤-323397913-blue.svg?style=flat-square&color=12b7f5&logo=qq)](https://qm.qq.com/cgi-bin/qm/qr?k=it9gUUVdBEDWiTOH21NsoRHAbE9IAzAO&jump_from=webapi&authKey=KQwSXEPwpAlzAFvanFURm0Foec9G9Dak0DmThWCexhqUFbWzlGjAFC7t0jrjdKdL)
 
 </div>
 
-## ¼ò½é introduction
+## ç®€ä»‹ introduction
 
-1. ¼õÉÙÑ§Ï°³É±¾
-2. ²»ÓÃÅäÖÃ Ö±½ÓÊ¹ÓÃ
+1. å‡å°‘å­¦ä¹ æˆæœ¬
+2. ä¸ç”¨é…ç½® ç›´æ¥ä½¿ç”¨
 
 
 
-## ÊÊÓÃ¶Ë apply
+## é€‚ç”¨ç«¯ apply
 
 **use for `.net6.0` project**
 
 
 
-## ÒÀÀµ rely on
+## ä¾èµ– rely on
 ** `NLog` **
 
-nuget °²×° NLog
+nuget å®‰è£… NLog
 
-## °²×° rely on
+## å®‰è£… rely on
 
-nuget °²×° Log78
+nuget å®‰è£… Log78
 
-## ÊôĞÔ props
+## å±æ€§ props
 
 you can see Log/Log78.cs
 
-## ·½·¨ method
+## æ–¹æ³• method
 
 you can see Log/Log78.cs
 
