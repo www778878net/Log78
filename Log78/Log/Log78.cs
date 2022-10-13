@@ -10,11 +10,15 @@ namespace www778878net.Log
     /// <summary>
     /// 封装log 方便使用和切换
     /// </summary>
-    public static class Log78
+    public   class Log78
     {
         public  delegate void LogHandler(string leave,string info);
-        public static event LogHandler? EventLog;
-        static Logger Logger;
+        public   event LogHandler? EventLog;
+        public Logger Logger;
+        /// <summary>
+        /// 单例
+        /// </summary>
+        public static Log78 client;
         static Log78()
         {
             //创建一个配置文件对象
@@ -39,10 +43,16 @@ namespace www778878net.Log
 
             //配置文件生效
             LogManager.Configuration = config;
+            client = new  ();
+            
+        }
+
+        public Log78()
+        {
             Logger = LogManager.GetCurrentClassLogger();
         }
 
-        private static void OnEventLog(string leave, string message)
+        private   void OnEventLog(string leave, string message)
         {
             if (EventLog != null)
             {
@@ -53,7 +63,7 @@ namespace www778878net.Log
         /// <summary>
         /// 
         /// </summary>
-        public static void Debug(string info)
+        public   void Debug(string info)
         {  
             //打出日志
             Logger.Debug(info);
@@ -62,7 +72,7 @@ namespace www778878net.Log
         /// <summary>
         /// 
         /// </summary>
-        public static void Info(string info)
+        public   void Info(string info)
         {
             //打出日志
             Logger.Info(info);
@@ -72,7 +82,7 @@ namespace www778878net.Log
         /// <summary>
         /// 
         /// </summary>
-        public static void Warn(string info)
+        public   void Warn(string info)
         {
             //打出日志
             Logger.Warn(info);
@@ -82,7 +92,7 @@ namespace www778878net.Log
         /// <summary>
         /// 
         /// </summary>
-        public static void Error(string info)
+        public   void Error(string info)
         {
             //打出日志
             Logger.Error(info);
@@ -92,7 +102,7 @@ namespace www778878net.Log
         /// <summary>
         /// 
         /// </summary>
-        public static void Error(Exception err)
+        public   void Error(Exception err)
         {
             //打出日志
             Logger.Error(err);
