@@ -5,7 +5,7 @@
 
 「Log78」简单封装NLog，方便调用。
 
-[![Build Status](https://dev.azure.com/www778878net/test/_apis/build/status/www778878net.Log78?branchName=main)](https://dev.azure.com/www778878net/test/_build/latest?definitionId=17&branchName=main)
+[![Build Status](https://dev.azure.com/www778878net/test/_apis/build/status/testok/www778878net.Log78?branchName=main)](https://dev.azure.com/www778878net/test/_build/latest?definitionId=17&branchName=main)
 [![QQ群](https://img.shields.io/badge/QQ群-323397913-blue.svg?style=flat-square&color=12b7f5&logo=qq)](https://qm.qq.com/cgi-bin/qm/qr?k=it9gUUVdBEDWiTOH21NsoRHAbE9IAzAO&jump_from=webapi&authKey=KQwSXEPwpAlzAFvanFURm0Foec9G9Dak0DmThWCexhqUFbWzlGjAFC7t0jrjdKdL)
 
 </div>
