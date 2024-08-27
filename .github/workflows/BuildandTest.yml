@@ -95,7 +95,6 @@ jobs:
     - name: Publish to NuGet
       run: |
         dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
-        dotnet nuget push ./artifacts/*.symbols.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
     - name: List files in artifacts directory
       run: ls -la ./artifacts
