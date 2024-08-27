@@ -79,7 +79,7 @@ jobs:
       run: mkdir -p ./test/TestResults
 
     - name: Run NUnit tests
-      run: dotnet test ./test/Test.csproj --no-build --logger "trx;LogFileName=testresults.trx" --results-directory ./test/TestResults
+      run: dotnet test ./test/test.csproj --no-build --logger "trx;LogFileName=testresults.trx" --results-directory ./test/TestResults
 
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2
