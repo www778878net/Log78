@@ -87,7 +87,7 @@ jobs:
       with:
         files: './test/TestResults/*.trx'
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
     - name: Pack project
       run: dotnet pack ./Log78/Log78.csproj --output ./artifacts --include-symbols --no-build
