@@ -44,10 +44,10 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y xmlstarlet
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ./Log78/Log78.csproj
 
     - name: Build solution
-      run: dotnet build --no-restore
+      run: dotnet build ./Log78/Log78.csproj --no-restore
 
     - name: Update version number
       id: update-version
