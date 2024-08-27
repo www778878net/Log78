@@ -1,112 +1,119 @@
-﻿using NLog;
+﻿#nullable enable
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace www778878net.Log
+namespace www778878net.log
 {
     /// <summary>
-    /// 封装log 方便使用和切换
+    /// 根据LOG等级确认哪些打印 哪些写文件 哪些写入服务器
     /// </summary>
-    public   class Log78
-    {
-        public  delegate void LogHandler(string leave,string info);
-        public   event LogHandler? EventLog;
-        public Logger Logger;
+    public class Log78
+    {     
+      
         /// <summary>
-        /// 单例
+        /// 类别等于其中之一 既打印本地 又打印服务器
         /// </summary>
-        public static Log78 client;
-        static Log78()
+        public string[] debugKind = new string[0];
+        public int LevelFile { get; set; } = 50;
+        public int LevelConsole { get; set; } = 30;
+        public int LevelApi { get; set; } = 70;
+        private IServerLog78? serverLogger;
+        private IConsoleLog78? consoleLogger=new ConsoleLog78();
+        private IFileLog78? fileLogger;
+
+
+        public string uname{get;set;}="";//默认key3是用户名
+
+        // 公共的静态方法，用于获取单例实例
+        private static  Log78? instance ;
+        public static Log78 Instance
         {
-            //创建一个配置文件对象
-            var config = new NLog.Config.LoggingConfiguration();
-            //创建日志写入目的地
-            var logfile = new NLog.Targets.FileTarget("logfile")
+            get
             {
-                FileName = "logs/log.txt",
-                Layout = "${longdate} [${level}].[${logger}].[${threadid}}].[${elapse}]${newline}${message}${newline}${onexception:inner=${newline} *****Error***** ${newline} ${exception:format=toString}${exception:format=StackTrace}}",
-                ArchiveAboveSize = 104857600,
-                ArchiveEvery = NLog.Targets.FileArchivePeriod.Day,
-                ArchiveNumbering = NLog.Targets.ArchiveNumberingMode.Rolling,  // "Rolling",
-                ArchiveFileName = "logs/archives/log.{###}.txt",
-                ArchiveDateFormat = "yyyyMMdd-hhmmss",
-                MaxArchiveFiles = 10,
-                EnableFileDelete = true
+                if(instance==null)
+                    instance = new Log78();
+                     
+                     
+                return instance;
+            }
+        }
+        
+
+
+        public void setup(IServerLog78 serverLogger, IFileLog78 fileLogger, IConsoleLog78 consoleLogger, string _uname = "guest")
+        {
+            this.serverLogger = serverLogger;
+            this.consoleLogger = consoleLogger;
+            this.fileLogger = fileLogger;
+            this.uname = _uname;
+        }
+
+        public Log78 Clone(){
+            return new Log78(){
+                serverLogger=this.serverLogger,
+                fileLogger=this.fileLogger,
+                consoleLogger=this.consoleLogger,
+                uname=this.uname,               
+                LevelApi=this.LevelApi,
+                LevelConsole=this.LevelConsole,
+                LevelFile=this.LevelFile             
 
             };
-            //添加日志路由规则
-            config.AddRule(LogLevel.Trace, LogLevel.Fatal, logfile, "Microsoft.*", true);
-            config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
+        }
 
-            //配置文件生效
-            LogManager.Configuration = config;
-            client = new  ();
+        public void LogErr(Exception exception, string key1= "errwinpro", [CallerMemberName] string previousMethodName = "")
+        {
+            Log(exception.Message, 90, key1, previousMethodName, uname, exception.StackTrace);
+        }
+
+        public void Log(string message, int level = 0,  [CallerMemberName] string key1 = "", string key2 = "", string key3 = "", string content = "", string key4 = "", string key5 = "", string key6 = "")
+        {
+            if (string.IsNullOrEmpty(key1))
+                key1 = "";
+            if (string.IsNullOrEmpty(key2))
+                key2 = "";
+            if (string.IsNullOrEmpty(key3))
+                key3 = uname;
+            bool isdebug = false;
+            string tmpkind;
+            //是否debugkey
+            for (int i = 0; i < 6; i++)
+            {
+                switch (i)
+                {
+                    case 0: tmpkind = key1; break;
+                    case 1: tmpkind = key2; break;
+                    case 2: tmpkind = key3; break;
+                    case 3: tmpkind = key4; break;
+                    case 4: tmpkind = key5; break;
+                    default: tmpkind = key6; break;
+                }
+                for (int j = 0; j < debugKind.Length; j++)
+                {
+                    if (tmpkind == debugKind[j])
+                    {
+                        isdebug = true;
+                        break;
+                    }
+                }
+                if (isdebug) break;
+            }
+
+            if (isdebug || level >= LevelApi)            
+                serverLogger?.LogToServer(message, key1, level, key2, key3, content, key4, key5, key6);
+            
+            string info = DateTime.Now.ToString() + "\t" + message + "~~" + content + "~~" + key1;
+            if (isdebug || level >= LevelFile)            
+                fileLogger?.LogToFile(info);
+            
+
+            if (isdebug || level >= LevelConsole)            
+                consoleLogger?.WriteLine(info);
             
         }
 
-        public Log78()
-        {
-            Logger = LogManager.GetCurrentClassLogger();
-        }
-
-        private   void OnEventLog(string leave, string message)
-        {
-            if (EventLog != null)
-            {
-                EventLog(leave,message);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public   void Debug(string info)
-        {  
-            //打出日志
-            Logger.Debug(info);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public   void Info(string info)
-        {
-            //打出日志
-            Logger.Info(info);
-            OnEventLog("Info", info);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public   void Warn(string info)
-        {
-            //打出日志
-            Logger.Warn(info);
-            OnEventLog("Warn", info);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public   void Error(string info)
-        {
-            //打出日志
-            Logger.Error(info);
-            OnEventLog("Error", info);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public   void Error(Exception err)
-        {
-            //打出日志
-            Logger.Error(err);
-            OnEventLog("Error", err.Message);
-        }
+        
     }
 }

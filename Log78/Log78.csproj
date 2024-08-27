@@ -7,7 +7,7 @@
     <IsPackable>true</IsPackable>
 
     <Deterministic>false</Deterministic>
-    <Version>0.0.1.0001</Version>
+    <PackageVersion>1.0.1</PackageVersion>
     <PackageId>Log78</PackageId>
     <Authors>Frieda.657225485@qq.com</Authors>
     <Company>www778878net</Company>
