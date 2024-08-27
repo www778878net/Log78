@@ -1,13 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<?xml version="1.0"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
-
     <Deterministic>false</Deterministic>
-    <PackageVersion>1.0.1</PackageVersion>
+    <PackageVersion>1.0.2</PackageVersion>
     <PackageId>Log78</PackageId>
     <Authors>Frieda.657225485@qq.com</Authors>
     <Company>www778878net</Company>
@@ -22,16 +21,13 @@
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.0.4" />
+    <PackageReference Include="NLog" Version="5.0.4"/>
   </ItemGroup>
-
 </Project>
