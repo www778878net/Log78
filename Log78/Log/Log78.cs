@@ -68,7 +68,7 @@ namespace www778878net.log
             Log(exception.Message, 90, key1, previousMethodName, uname, exception.StackTrace);
         }
 
-        public void Log(string message, int level = 0,  [CallerMemberName] string key1 = "", string key2 = "", string key3 = "", string content = "", string key4 = "", string key5 = "", string key6 = "")
+        public void Log(string message, int level = 50,  [CallerMemberName] string key1 = "", string key2 = "", string key3 = "", string content = "", string key4 = "", string key5 = "", string key6 = "")
         {
             if (string.IsNullOrEmpty(key1))
                 key1 = "";
