@@ -20,6 +20,7 @@
     <RootNamespace>www778878net</RootNamespace>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <Description>Log78 is a class for encapsulating logging functionality, supporting various types of log output including console, file, and server-side output. It uses the singleton pattern to ensure only one instance globally and provides methods for setting different log levels.</Description>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\README.md">
