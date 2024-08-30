@@ -32,8 +32,11 @@ namespace www778878net.log
         {
             get
             {
-                if(instance==null)
+                if(instance==null){
                     instance = new Log78();
+                    instance.setup(null,new FileLog78(),new ConsoleLog78(),"guest");
+                  }
+                    
                      
                      
                 return instance;
