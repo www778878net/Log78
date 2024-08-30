@@ -42,7 +42,7 @@ namespace www778878net.log
         
 
 
-        public void setup(IServerLog78 serverLogger, IFileLog78 fileLogger, IConsoleLog78 consoleLogger, string _uname = "guest")
+        public void setup(IServerLog78? serverLogger, IFileLog78? fileLogger, IConsoleLog78? consoleLogger, string _uname = "guest")
         {
             this.serverLogger = serverLogger;
             this.consoleLogger = consoleLogger;
