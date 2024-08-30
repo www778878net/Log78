@@ -14,7 +14,7 @@ namespace www778878net.log
         private static object olook = new object();
         public static string logpath{get;set;} = "/";
 
-        public FileLog78(string _menu) 
+        public FileLog78(string _menu="") 
         { 
             this.menu = _menu;
             int idate = DateTime.Now.Day % 3;
