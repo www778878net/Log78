@@ -23,7 +23,7 @@
 
 通过 NuGet 包管理器安装：
 
-dotnet add package Log78
+dotnet add package Log78 
 
 ### 使用
 
