@@ -23,32 +23,99 @@ English | [简体中文](./README.cn.md)
 
 Install via NuGet Package Manager:
 
+```
 dotnet add package Log78
+```
 
 ### Usage
-```c#
+
+```csharp
 using www778878net.log;
 
 var log = Log78.Instance;
-log.setup(serverLogger, fileLogger, consoleLogger, "admin");
-log.log("Hello, world!", 50);
+log.setup(serverLogger, fileLogger, consoleLogger);
+
+var logEntry = new LogEntry();
+logEntry.Basic.Message = "Hello, world!";
+log.INFO(logEntry);
 ```
+
 ### Properties
 
-- `debugKind`: A list of log debugging kinds used to control which types of logs are recorded.
-- `LevelFile`, `LevelConsole`, `LevelApi`: Respectively represent the threshold levels for file logs, console logs, and API logs. By default, the console log level is 30, the file log level is 50, and the API log level is 70.
-- `serverLogger`, `fileLogger`, `consoleLogger`: Respectively represent the server logger, file logger, and console logger instances.
-- `uname`: The username, which defaults to an empty string.
+- `debugKind`: A HashSet of log debugging keywords used to control which types of logs are recorded.
+- `LevelFile`, `LevelConsole`, `LevelApi`: Respectively represent the threshold levels for file logs, console logs, and API logs.
+- `DebugEntry`: Used to set more fine-grained debugging conditions.
+
+### Suggested Log Levels
+
+- DEBUG (10): Detailed debug information, typically used only in development environments
+- INFO (50): General information, can be used to track normal application operations
+- WARN (50): Warning information, indicating potential issues but not affecting main functionality
+- ERROR (70): Errors and serious problems that require immediate attention
+
+### Example: Adjusting Log Levels
+
+```csharp
+using www778878net.log;
+var log = Log78.Instance;
+log.setup(serverLogger, fileLogger, consoleLogger);
+// Adjust console log level to 0 to print all logs (for debugging)
+log.LevelConsole = 0;
+// Adjust file log level to 60 to only record more severe warnings and errors
+log.LevelFile = 60;
+
+// Using different levels to record logs
+var logEntry = new LogEntry();
+logEntry.Basic.Message = "Debug information";
+log.DEBUG(logEntry); // Will only output to console
+
+logEntry.Basic.Message = "General information";
+log.INFO(logEntry); // Will output to console, not recorded in file
+
+logEntry.Basic.Message = "Warning";
+log.WARN(logEntry); // Will be recorded in both console and file
+
+logEntry.Basic.Message = "Error";
+log.ERROR(logEntry); // Will be recorded in console, file, and API
+```
 
 ### Methods
 
-- `setup`: Sets up the logger instances.
-- `Clone`: Creates a clone of the current instance.
-- `LogErr`: Logs error messages.
-- `Log`: Logs messages based on the provided parameters. Log levels can be set individually for each class.
+- `setup`: Sets up logger instances.
+- `DEBUG`, `INFO`, `WARN`, `ERROR`: Record logs of different levels.
+- `ERROR(Exception, LogEntry)`: Records exception error logs.
+
+### Custom Log Entries
+
+You can create custom log entries by inheriting from the `LogEntry` class:
+
+```csharp
+public class CustomLogEntry : LogEntry
+{
+    public DateTime Date { get; set; }
+    public string Weather { get; set; }
+
+    public CustomLogEntry()
+    {
+        Date = DateTime.Now;
+        Weather = "Unknown";
+        Basic.HostName = Environment.MachineName;
+        Basic.UserName = Environment.UserName;
+    }
+}
+
+// Using a custom log entry
+var customEntry = new CustomLogEntry
+{
+    Basic = { Message = "Test message", Summary = "Test summary" },
+    Weather = "Sunny"
+};
+log.INFO(customEntry);
+```
 
 ### Example
-```c#
+
+```csharp
 using www778878net.log;
 
 // Create logger instances
@@ -60,10 +127,12 @@ var consoleLogger = new ConsoleLog78();
 var log = Log78.Instance;
 
 // Setup the logger
-log.setup(serverLogger, fileLogger, consoleLogger, "admin");
+log.setup(serverLogger, fileLogger, consoleLogger);
 
-// Log a message
-log.Log("This is a log message.", 50); // Both console and file will output because 50 >= 30 && 50 >= 50
+// Log an information message
+var infoEntry = new LogEntry();
+infoEntry.Basic.Message = "This is an info message.";
+log.INFO(infoEntry);
 
 // Log an error message
 try
@@ -72,9 +141,12 @@ try
 }
 catch (Exception error)
 {
-    log.LogErr(error);
+    var errorEntry = new LogEntry();
+    errorEntry.Basic.Message = "An error occurred.";
+    log.ERROR(error, errorEntry);
 }
 ```
+
 ### Other
 
 For more detailed information, please refer to the project's [GitHub repository](https://github.com/www778878net/Log78) or the [API documentation](http://www.778878.net/docs/#/Log78/).

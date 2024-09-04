@@ -23,29 +23,27 @@
 
 通过 NuGet 包管理器安装：
 
-~~~
+```
 dotnet add package Log78 
-~~~
+```
 
 ### 使用
 
-~~~csharp
+```csharp
 using www778878net.log;
 
 var log = Log78.Instance;
-log.setup(serverLogger, fileLogger, consoleLogger, "admin");
+log.setup(serverLogger, fileLogger, consoleLogger);
 
 var logEntry = new LogEntry();
 logEntry.Basic.Message = "Hello, world!";
 log.INFO(logEntry);
-~~~
+```
 
 ### 属性
 
 - `debugKind`: 日志调试关键字集合，用于控制哪些类型的日志会被记录。
 - `LevelFile`, `LevelConsole`, `LevelApi`: 分别表示文件日志、控制台日志和 API 日志的级别阈值。
-- `serverLogger`, `fileLogger`, `consoleLogger`: 分别表示服务器日志记录器、文件日志记录器和控制台日志记录器。
-- `uname`: 用户名，默认为空字符串。
 - `DebugEntry`: 用于设置更精细的调试条件。
 
 ### 日志级别使用建议
@@ -57,10 +55,10 @@ log.INFO(logEntry);
 
 ### 示例: 调整日志级别
 
-~~~csharp
+```csharp
 using www778878net.log;
 var log = Log78.Instance;
-log.setup(serverLogger, fileLogger, consoleLogger, "admin");
+log.setup(serverLogger, fileLogger, consoleLogger);
 // 调整控制台日志级别为0,以打印所有日志(用于调试)
 log.LevelConsole = 0;
 // 调整文件日志级别为60,只记录较严重的警告和错误
@@ -72,14 +70,14 @@ logEntry.Basic.Message = "调试信息";
 log.DEBUG(logEntry); // 只会在控制台输出
 
 logEntry.Basic.Message = "一般信息";
-log.INFO(logEntry); // 控制台和文件都会记录
+log.INFO(logEntry); // 控制台输出，文件不会记录
 
 logEntry.Basic.Message = "警告";
 log.WARN(logEntry); // 控制台和文件都会记录
 
 logEntry.Basic.Message = "错误";
 log.ERROR(logEntry); // 控制台、文件和API都会记录
-~~~
+```
 
 ### 方法
 
@@ -87,9 +85,37 @@ log.ERROR(logEntry); // 控制台、文件和API都会记录
 - `DEBUG`, `INFO`, `WARN`, `ERROR`: 记录不同级别的日志。
 - `ERROR(Exception, LogEntry)`: 记录异常错误日志。
 
+### 自定义日志条目
+
+您可以通过继承 `LogEntry` 类来创建自定义的日志条目：
+
+```csharp
+public class CustomLogEntry : LogEntry
+{
+    public DateTime Date { get; set; }
+    public string Weather { get; set; }
+
+    public CustomLogEntry()
+    {
+        Date = DateTime.Now;
+        Weather = "Unknown";
+        Basic.HostName = Environment.MachineName;
+        Basic.UserName = Environment.UserName;
+    }
+}
+
+// 使用自定义日志条目
+var customEntry = new CustomLogEntry
+{
+    Basic = { Message = "Test message", Summary = "Test summary" },
+    Weather = "Sunny"
+};
+log.INFO(customEntry);
+```
+
 ### 示例
 
-~~~csharp
+```csharp
 using www778878net.log;
 
 // 创建日志记录器实例
@@ -101,7 +127,7 @@ var consoleLogger = new ConsoleLog78();
 var log = Log78.Instance;
 
 // 设置日志记录器
-log.setup(serverLogger, fileLogger, consoleLogger, "admin");
+log.setup(serverLogger, fileLogger, consoleLogger);
 
 // 记录一条信息日志
 var infoEntry = new LogEntry();
@@ -119,7 +145,7 @@ catch (Exception error)
     errorEntry.Basic.Message = "An error occurred.";
     log.ERROR(error, errorEntry);
 }
-~~~
+```
 
 ### 其他
 

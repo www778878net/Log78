@@ -40,46 +40,22 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: Install xmlstarlet
-      run: sudo apt-get update && sudo apt-get install -y xmlstarlet
 
     - name: Restore dependencies
-      run: dotnet restore ./Log78/Log78.csproj
+      run: dotnet restore
 
     - name: Build solution
-      run: dotnet build ./Log78/Log78.csproj --no-restore
+      run: dotnet build --no-restore  
 
-    - name: Update version number
-      id: update-version
-      run: |
-        
-        # Get the current version number from the csproj file
-        CURRENT_VERSION=$(xmlstarlet sel -t -v "//Project/PropertyGroup/PackageVersion" ./Log78/Log78.csproj)
-        
-        # Split the version number into an array
-        IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
-        
-        # Increment the last part of the version number
-        PATCH_VERSION=$((VERSION_PARTS[2] + 1))
-        
-        # Construct the new version number
-        NEW_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.${PATCH_VERSION}"
-        
-        # Update the csproj file with the new version number
-        xmlstarlet ed -L -u "//Project/PropertyGroup/PackageVersion" -v "$NEW_VERSION" ./Log78/Log78.csproj
-        
-        # Output the new version number for debugging
-        echo "New version number: $NEW_VERSION"
-        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-
-    - name: Build Log78 project
-      run: dotnet build ./Log78/Log78.csproj --configuration Release
+    - name: Build solution
+      run: dotnet build ./src/Log78/Log78.csproj -configuration Release
+ 
 
     - name: Create Test Results Directory
-      run: mkdir -p ./test/TestResults
+      run: mkdir -p ./tests/TestResults
 
     - name: Run NUnit tests
-      run: dotnet test ./test/test.csproj --no-build --logger "trx;LogFileName=testresults.trx" --results-directory ./test/TestResults
+      run: dotnet test ./tests/Log78.Tests/test.csproj --no-build --logger "trx;LogFileName=testresults.trx" --results-directory ./tests/TestResults
 
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2
@@ -89,8 +65,11 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
-    - name: Pack project
-      run: dotnet pack ./Log78/Log78.csproj --output ./artifacts --include-symbols --no-build
+    - name: Pack project for .NET Framework 4.8
+      run: dotnet pack ./src/Log78/Log78.csproj -c Release -p:TargetFramework=net48 --output ./artifacts --include-symbols
+
+    - name: Pack project for .NET 6.0
+      run: dotnet pack ./src/Log78/Log78.csproj -c Release -p:TargetFramework=net6.0 --output ./artifacts --include-symbols
 
     - name: Publish to NuGet
       run: |
@@ -99,9 +78,3 @@ jobs:
     - name: List files in artifacts directory
       run: ls -la ./artifacts
 
-    - name: Commit and push changes
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        commit_message: '${{ steps.update-version.outputs.new_version }}'
-        file_pattern: './Log78/Log78.csproj' 
-        tagging_message: '${{ steps.update-version.outputs.new_version }}'
