@@ -21,7 +21,7 @@ namespace www778878net.log
             string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Menu);
             Directory.CreateDirectory(logDirectory);
 
-            string logFileName = Path.Combine(logDirectory, $"7788_{{HH}}.log");
+            string logFileName = Path.Combine(logDirectory, $"7788_.log");
             _logger = new LoggerConfiguration()
                 .WriteTo.File(logFileName, rollingInterval: RollingInterval.Hour)
                 .CreateLogger();
