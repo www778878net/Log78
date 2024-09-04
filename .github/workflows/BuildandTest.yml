@@ -22,24 +22,10 @@ jobs:
       with:
         fetch-depth: 0 
 
-    - name: Check commit message
-      id: check-commit-message
-      run: |
-        COMMIT_MESSAGE=$(git log --format=%B -n 1 ${{ github.sha }})
-        echo "Commit message: $COMMIT_MESSAGE"
-        if [[ $COMMIT_MESSAGE == *Merge* ]]; then
-          echo "merge_commit=true" >> $GITHUB_OUTPUT
-        else
-          echo "merge_commit=false" >> $GITHUB_OUTPUT
-        fi
-
-
     - name: Setup .NET Core
-      if: steps.check-commit-message.outputs.merge_commit == 'false'
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
-
 
     - name: Restore dependencies
       run: dotnet restore
@@ -47,19 +33,22 @@ jobs:
     - name: Build solution
       run: dotnet build --configuration Release --no-restore
 
-    - name: Create Test Results Directory
+    - name: Create TestResults directory
       run: mkdir -p ./tests/TestResults
 
-    - name: Run NUnit tests
-      run: dotnet test ./tests/Log78.Tests/test.csproj --no-build --logger "trx;LogFileName=testresults.trx" --results-directory ./tests/TestResults
+    - name: Run tests
+      run: |
+        dotnet test ./tests/Log78.Tests/test.csproj --configuration Release --no-build --logger "trx;LogFileName=testresults.trx" --results-directory ./tests/TestResults
+        if [ $? -ne 0 ]; then
+          dotnet test ./tests/Log78.Tests/test.csproj --help
+          exit 1
+        fi
 
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
       with:
         files: './tests/TestResults/*.trx'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
     - name: Pack project for .NET Framework 4.8
       run: dotnet pack ./src/Log78/Log78.csproj -c Release -p:TargetFramework=net48 --output ./artifacts --include-symbols
