@@ -32,7 +32,16 @@ if "!current_branch!" == "develop" (
 
     echo Pre-push checks for develop branch completed.
 ) else if "!current_branch!" == "main" (
-    echo Current branch is main. Merging changes to develop...
+    echo Current branch is main. Running release process...
+
+    REM Run release.bat
+    call release.bat
+    if !errorlevel! neq 0 (
+        echo Release process failed. Aborting push.
+        exit /b 1
+    )
+
+    echo Release process completed. Merging changes to develop...
 
     REM Store the current commit hash
     for /f "delims=" %%i in ('git rev-parse HEAD') do set "current_commit=%%i"
@@ -47,8 +56,6 @@ if "!current_branch!" == "develop" (
     git merge !current_commit!
 
     echo Merged changes from main to develop. Please review and push manually if everything looks good.
-
-   
 ) else (
     echo Current branch is !current_branch!. Skipping pre-push checks and merge.
 )
