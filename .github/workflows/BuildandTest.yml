@@ -61,7 +61,7 @@ jobs:
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
       with:
-        files: './test/TestResults/*.trx'
+        files: './tests/TestResults/*.trx'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
