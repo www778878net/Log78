@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 echo Pre-commit hook is running...
 
-REM Get current branch name
+REM Get current  branch name
 for /f "delims=" %%i in ('git rev-parse --abbrev-ref HEAD') do set "current_branch=%%i"
 
 if "!current_branch!" == "develop" (
