@@ -23,33 +23,41 @@
 
 通过 NuGet 包管理器安装：
 
-dotnet add package  Log78 
+~~~
+dotnet add package Log78 
+~~~
 
 ### 使用
 
+~~~csharp
 using www778878net.log;
 
 var log = Log78.Instance;
 log.setup(serverLogger, fileLogger, consoleLogger, "admin");
-log.log("Hello, world!", 50);
+
+var logEntry = new LogEntry();
+logEntry.Basic.Message = "Hello, world!";
+log.INFO(logEntry);
+~~~
 
 ### 属性
 
-- `debugKind`: 日志调试种类列表，用于控制哪些类型的日志会被记录。
-- `LevelFile`, `LevelConsole`, `LevelApi`: 分别表示文件日志、控制台日志和 API 日志的级别阈值。默认情况下，控制台日志级别为 30，文件日志级别为 50，API 日志级别为 70。
+- `debugKind`: 日志调试关键字集合，用于控制哪些类型的日志会被记录。
+- `LevelFile`, `LevelConsole`, `LevelApi`: 分别表示文件日志、控制台日志和 API 日志的级别阈值。
 - `serverLogger`, `fileLogger`, `consoleLogger`: 分别表示服务器日志记录器、文件日志记录器和控制台日志记录器。
 - `uname`: 用户名，默认为空字符串。
+- `DebugEntry`: 用于设置更精细的调试条件。
 
 ### 日志级别使用建议
 
-虽然日志级别是完全可自定义的,但以下是一般使用建议:
-- 0-29: 详细的调试信息,通常只在开发环境中使用
-- 30-49: 一般信息,可用于跟踪应用程序的正常操作
-- 50-69: 警告信息,表示潜在的问题,但不影响主要功能
-- 70+: 错误和严重问题,需要立即关注
+- DEBUG (10): 详细的调试信息，通常只在开发环境中使用
+- INFO (50): 一般信息，可用于跟踪应用程序的正常操作
+- WARN (50): 警告信息，表示潜在的问题，但不影响主要功能
+- ERROR (70): 错误和严重问题，需要立即关注
 
 ### 示例: 调整日志级别
 
+~~~csharp
 using www778878net.log;
 var log = Log78.Instance;
 log.setup(serverLogger, fileLogger, consoleLogger, "admin");
@@ -57,21 +65,31 @@ log.setup(serverLogger, fileLogger, consoleLogger, "admin");
 log.LevelConsole = 0;
 // 调整文件日志级别为60,只记录较严重的警告和错误
 log.LevelFile = 60;
+
 // 使用不同级别记录日志
-log.Log("调试信息", 10); // 只会在控制台输出
-log.Log("一般信息", 40); // 控制台输出,不会写入文件
-log.Log("警告", 65); // 控制台和文件都会记录
-log.Log("错误", 80); // 控制台、文件和API都会记录
+var logEntry = new LogEntry();
+logEntry.Basic.Message = "调试信息";
+log.DEBUG(logEntry); // 只会在控制台输出
+
+logEntry.Basic.Message = "一般信息";
+log.INFO(logEntry); // 控制台和文件都会记录
+
+logEntry.Basic.Message = "警告";
+log.WARN(logEntry); // 控制台和文件都会记录
+
+logEntry.Basic.Message = "错误";
+log.ERROR(logEntry); // 控制台、文件和API都会记录
+~~~
 
 ### 方法
 
 - `setup`: 设置日志记录器实例。
-- `Clone`: 创建一个当前实例的克隆。
-- `LogErr`: 记录错误日志。
-- `Log`: 根据提供的参数记录日志信息。可以为每个类单独设置日志级别。
+- `DEBUG`, `INFO`, `WARN`, `ERROR`: 记录不同级别的日志。
+- `ERROR(Exception, LogEntry)`: 记录异常错误日志。
 
 ### 示例
 
+~~~csharp
 using www778878net.log;
 
 // 创建日志记录器实例
@@ -85,8 +103,10 @@ var log = Log78.Instance;
 // 设置日志记录器
 log.setup(serverLogger, fileLogger, consoleLogger, "admin");
 
-// 记录一条日志
-log.Log("This is a log message.", 50); // 控制台和文件都会输出，因为50 >= 30 && 50 >= 50
+// 记录一条信息日志
+var infoEntry = new LogEntry();
+infoEntry.Basic.Message = "This is an info message.";
+log.INFO(infoEntry);
 
 // 记录一条错误日志
 try
@@ -95,8 +115,11 @@ try
 }
 catch (Exception error)
 {
-    log.LogErr(error);
+    var errorEntry = new LogEntry();
+    errorEntry.Basic.Message = "An error occurred.";
+    log.ERROR(error, errorEntry);
 }
+~~~
 
 ### 其他
 

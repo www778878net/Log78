@@ -32,67 +32,92 @@ namespace Test78
     [TestMethod]
     public void TestSetup()
     {
-      var log = new Log78();
+      var log = Log78.Instance;
       var mockServerLogger = new MockServerLogger();
       var mockFileLogger = new MockFileLogger();
       var mockConsoleLogger = new MockConsoleLogger();
 
-      log.setup(mockServerLogger, mockFileLogger, mockConsoleLogger, "testUser");
+      log.setup(mockServerLogger, mockFileLogger, mockConsoleLogger);
 
-      Assert.AreEqual("testUser", log.uname, "用户名应该被正确设置");
+      // 使用日志方法来间接测试记录器是否被正确设置
+      var testEntry = new LogEntry();
+      testEntry.Basic.Message = "Test setup";
+
+      // 测试 API 日志
+      log.LevelApi = 0; // 确保 API 日志会被记录
+      log.INFO(testEntry);
+      Assert.IsTrue(mockServerLogger.WasLogCalled, "服务器日志记录器应该被调用");
+
+      // 测试文件日志
+      log.LevelFile = 0; // 确保文件日志会被记录
+      log.INFO(testEntry);
+      Assert.IsTrue(mockFileLogger.WasLogCalled, "文件日志记录器应该被调用");
+
+      // 测试控制台日志
+      log.LevelConsole = 0; // 确保控制台日志会被记录
+      log.INFO(testEntry);
+      Assert.IsTrue(mockConsoleLogger.WasLogCalled, "控制台日志记录器应该被调用");
+
+      // 重置日志级别
+      log.LevelApi = 70;
+      log.LevelFile = 50;
+      log.LevelConsole = 30;
     }
 
     [TestMethod]
     public void TestClone()
     {
-      var originalLog = new Log78
-      {
-        LevelApi = 80,
-        LevelConsole = 40,
-        LevelFile = 60,
-        uname = "originalUser"
-      };
+      var originalLog = Log78.Instance;
+      originalLog.LevelApi = 80;
+      originalLog.LevelConsole = 40;
+      originalLog.LevelFile = 60;
 
       var clonedLog = originalLog.Clone();
 
       Assert.AreEqual(originalLog.LevelApi, clonedLog.LevelApi, "API级别应该相同");
       Assert.AreEqual(originalLog.LevelConsole, clonedLog.LevelConsole, "控制台级别应该相同");
       Assert.AreEqual(originalLog.LevelFile, clonedLog.LevelFile, "文件级别应该相同");
-      Assert.AreEqual(originalLog.uname, clonedLog.uname, "用户名应该相同");
     }
 
     [TestMethod]
-    public void TestLogErr()
+    public void TestCustomLogEntry()
     {
-      var log = new Log78();
+      var log = Log78.Instance;
       var mockConsoleLogger = new MockConsoleLogger();
-      log.setup(null, null, mockConsoleLogger, "testUser");
+      log.setup(null, null, mockConsoleLogger);
 
-      var exception = new Exception("测试异常");
-      log.LogErr(exception, "testKey");
+      var customEntry = new CustomLogEntry
+      {
+          Basic = { Message = "Test message", Summary = "Test summary" },
+          Weather = "Sunny"
+      };
 
-      Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains("测试异常"), "异常消息应该被记录");
-      Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains("testKey"), "key1应该被记录");
-    }
+      log.INFO(customEntry);
 
-    [TestMethod]
-    public void TestLog()
-    {
-      var log = new Log78();
-      var mockServerLogger = new MockServerLogger();
-      var mockFileLogger = new MockFileLogger();
-      var mockConsoleLogger = new MockConsoleLogger();
-
-      log.setup(mockServerLogger, mockFileLogger, mockConsoleLogger, "testUser");
-      log.LevelApi = 50;
-      log.LevelFile = 30;
-      log.LevelConsole = 10;
-
-      log.Log("测试消息", 40, "key1", "key2");
-
-      Assert.IsFalse(mockServerLogger.WasLogCalled, "服务器日志不应被调用");
-      Assert.IsTrue(mockFileLogger.WasLogCalled, "文件日志应被调用");
       Assert.IsTrue(mockConsoleLogger.WasLogCalled, "控制台日志应被调用");
+      Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains("Test message"), "消息应该被记录");
+      Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains("Test summary"), "摘要应该被记录");
+      Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains("Sunny"), "天气应该被记录");
+      Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains(Environment.MachineName), "主机名应该被记录");
+      Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains(Environment.UserName), "用户名应该被记录");
+    }
+
+    [TestMethod]
+    public void TestCustomLogEntryWithException()
+    {
+      var log = Log78.Instance;
+      var mockConsoleLogger = new MockConsoleLogger();
+      log.setup(null, null, mockConsoleLogger);
+
+      var customEntry = new CustomLogEntry();
+      var exception = new Exception("Test exception");
+
+      log.ERROR(exception, customEntry);
+
+      Assert.IsTrue(mockConsoleLogger.WasLogCalled, "控制台日志应被调用");
+      Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains("Test exception"), "异常消息应该被记录");
+      Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains(Environment.MachineName), "主机名应该被记录");
+      Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains(Environment.UserName), "用户名应该被记录");
     }
   }
 
@@ -100,23 +125,20 @@ namespace Test78
   public class MockServerLogger : IServerLog78
   {
     public bool WasLogCalled { get; private set; }
-    public void LogToServer(string message, string key1, int level, string key2, string key3, string content, string key4, string key5, string key6)
+    public string ServerUrl { get; set; } = "";
+    public void LogToServer(LogEntry logEntry)
     {
       WasLogCalled = true;
     }
+    public void SendLogFile(string menu, string logFile) { }
   }
 
   public class MockFileLogger : IFileLog78
   {
     public bool WasLogCalled { get; private set; }
-    public string menu { get; set; } = "test";
+    public string Menu { get; set; } = "test";
 
-    public void Clear()
-    {
-      throw new NotImplementedException();
-    }
-
-    public void LogToFile(string info)
+    public void LogToFile(LogEntry logEntry)
     {
       WasLogCalled = true;
     }
@@ -125,11 +147,11 @@ namespace Test78
   public class MockConsoleLogger : IConsoleLog78
   {
     public bool WasLogCalled { get; private set; }
-    public string LastLoggedMessage { get; private set; }
-    public void WriteLine(string info)
+    public string LastLoggedMessage { get; private set; }="";
+    public void WriteLine(LogEntry logEntry)
     {
       WasLogCalled = true;
-      LastLoggedMessage = info;
+      LastLoggedMessage = logEntry.ToJson();
     }
   }
 }
