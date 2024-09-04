@@ -13,14 +13,15 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace www778878net.log
 {
-    public class ConsoleLog78:IConsoleLog78
+    public interface IServerLog78
     {
-        public void WriteLine(string message)
-        {
-            Console.WriteLine(message);
-        }
+        string ServerUrl { get; set; }
+        void LogToServer(LogEntry logEntry);
+        void SendLogFile(string menu, string logFile);
     }
 }
