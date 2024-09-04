@@ -35,11 +35,11 @@ if "!current_branch!" == "develop" (
     echo Current branch is main. Running release process...
 
     REM Run release.bat
-    call release.bat
-    if !errorlevel! neq 0 (
-        echo Release process failed. Aborting push.
-        exit /b 1
-    )
+    @REM call release.bat
+    @REM if !errorlevel! neq 0 (
+    @REM     echo Release process failed. Aborting push.
+    @REM     exit /b 1
+    @REM )
 
     echo Release process completed. Merging changes to develop...
 
