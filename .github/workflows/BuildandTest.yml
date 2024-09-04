@@ -45,11 +45,7 @@ jobs:
       run: dotnet restore
 
     - name: Build solution
-      run: dotnet build --no-restore  
-
-    - name: Build solution
-      run: dotnet build ./src/Log78/Log78.csproj -configuration Release
- 
+      run: dotnet build --configuration Release --no-restore
 
     - name: Create Test Results Directory
       run: mkdir -p ./tests/TestResults
