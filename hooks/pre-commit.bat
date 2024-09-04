@@ -9,14 +9,7 @@ for /f "delims=" %%i in ('git rev-parse --abbrev-ref HEAD') do set "current_bran
 if "!current_branch!" == "develop" (
     echo Current branch is develop. Running pre-commit checks...
 
-      if exist "%~dp0release.bat" (
-        call "%~dp0release.bat"
-        echo release.bat is found
-        exit /b 1
-      ) else (
-          echo release.bat not found
-          exit /b 1
-      )
+    
 
     REM Switch to repository root directory
     for /f "delims=" %%i in ('git rev-parse --show-toplevel') do set "repo_root=%%i"
