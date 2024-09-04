@@ -16,7 +16,7 @@
     <PackageProjectUrl>http://www.778878.net</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/www778878net/Log78.git</RepositoryUrl>
-    <PackageTags>"7788";"www778878net";</PackageTags>
+     <PackageTags>7788;www778878net;log;logging;logger;diagnostics;tracing;error-handling;debugging;monitoring;performance;analytics;日志;日志记录;错误处理;调试;监控;性能;分析</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RootNamespace>www778878net</RootNamespace>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
