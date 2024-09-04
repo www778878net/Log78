@@ -13,7 +13,7 @@
 
 ## 反馈QQ群（点击加入）：[323397913](https://qm.qq.com/cgi-bin/qm/qr?k=it9gUUVdBEDWiTOH21NsoRHAbE9IAzAO&jump_from=webapi&authKey=KQwSXEPwpAlzAFvanFURm0Foec9G9Dak0DmThWCexhqUFbWzlGjAFC7t0jrjdKdL)
 
-## 1. `Log78` 类文档
+## 1. `Log78` 类文档 
 
 ### 概述
 
@@ -23,7 +23,7 @@
 
 通过 NuGet 包管理器安装：
 
-dotnet add package Log78 
+dotnet add package  Log78 
 
 ### 使用
 

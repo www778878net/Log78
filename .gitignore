@@ -2,10 +2,8 @@
 # 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
 ################################################################################
 
-/.vs
-/Log78/.vs
-/Log78/bin/Debug/net6.0
-/Log78/obj
-/test/obj
-/test/bin/Debug/net6.0
-/Log78/bin/Debug/
+.vs
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/

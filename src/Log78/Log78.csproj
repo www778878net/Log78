@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <TargetFrameworks>net48;net6.0</TargetFrameworks>
+    <LangVersion>7.3</LangVersion>
+    <!-- 移除 Nullable 设置 -->
+    <ImplicitUsings>disable</ImplicitUsings>     
     <IsPackable>true</IsPackable>
     <Deterministic>false</Deterministic>
     <PackageVersion>1.0.10</PackageVersion>
@@ -23,7 +24,7 @@
     <Description>Log78 is a class for encapsulating logging functionality, supporting various types of log output including console, file, and server-side output. It uses the singleton pattern to ensure only one instance globally and provides methods for setting different log levels.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\README.md">
+    <None Include="..\..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
