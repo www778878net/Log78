@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
+using System.Linq;
 
 namespace www778878net.log
 {
@@ -50,11 +50,63 @@ namespace www778878net.log
 
         public string ToJson()
         {
-            return JsonConvert.SerializeObject(this, Formatting.None,
-                new JsonSerializerSettings
+            var settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
+
+            var json = JsonConvert.SerializeObject(this, settings);
+            var jObject = JObject.Parse(json);
+
+            // 将所有嵌套属性提升到顶层
+            FlattenObject(jObject);
+
+            // 移除所有空对象
+            RemoveEmptyObjects(jObject);
+
+            return jObject.ToString(Formatting.None);
+        }
+
+        private void FlattenObject(JObject jObject)
+        {
+            var propertiesToAdd = new JObject();
+            var propertiesToRemove = new System.Collections.Generic.List<string>();
+
+            foreach (var property in jObject.Properties())
+            {
+                if (property.Value.Type == JTokenType.Object)
                 {
-                    NullValueHandling = NullValueHandling.Ignore
-                });
+                    var nestedObject = (JObject)property.Value;
+                    foreach (var nestedProperty in nestedObject.Properties())
+                    {
+                        propertiesToAdd.Add(nestedProperty.Name, nestedProperty.Value);
+                    }
+                    propertiesToRemove.Add(property.Name);
+                }
+            }
+
+            foreach (var propertyName in propertiesToRemove)
+            {
+                jObject.Remove(propertyName);
+            }
+
+            foreach (var property in propertiesToAdd.Properties())
+            {
+                jObject.Add(property.Name, property.Value);
+            }
+        }
+
+        private void RemoveEmptyObjects(JObject jObject)
+        {
+            var propertiesToRemove = jObject.Properties()
+                .Where(p => p.Value.Type == JTokenType.Object && !((JObject)p.Value).Properties().Any())
+                .Select(p => p.Name)
+                .ToList();
+
+            foreach (var propertyName in propertiesToRemove)
+            {
+                jObject.Remove(propertyName);
+            }
         }
 
         public void AddProperty(string key, object value)

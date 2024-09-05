@@ -1,15 +1,12 @@
 <h1 align="center">Log78</h1>
 <div align="center">
 
-
 English | [简体中文](./README.cn.md) 
-
 
 [![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Test Status](https://github.com/www778878net/Log78/actions/workflows/BuildandTest.yml/badge.svg?branch=main)](https://github.com/www778878net/Log78/actions/workflows/BuildandTest.yml)
 [![QQ Group](https://img.shields.io/badge/QQ%20Group-323397913-blue.svg?style=flat-square&color=12b7f5&logo=qq)](https://qm.qq.com/cgi-bin/qm/qr?k=it9gUUVdBEDWiTOH21NsoRHAbE9IAzAO&jump_from=webapi&authKey=KQwSXEPwpAlzAFvanFURm0Foec9G9Dak0DmThWCexhqUFbWzlGjAFC7t0jrjdKdL)
 </div>
-
 
 ## Feedback QQ Group (Click to join): [323397913](https://qm.qq.com/cgi-bin/qm/qr?k=it9gUUVdBEDWiTOH21NsoRHAbE9IAzAO&jump_from=webapi&authKey=KQwSXEPwpAlzAFvanFURm0Foec9G9Dak0DmThWCexhqUFbWzlGjAFC7t0jrjdKdL)
 
@@ -17,28 +14,49 @@ English | [简体中文](./README.cn.md)
 
 ### Overview
 
-`Log78` is a class for encapsulating logging functionality, supporting various types of log output including console output, file output, and server-side output. This class uses the singleton pattern to ensure there is only one instance globally and provides methods for setting different log levels.
+`Log78` is a powerful and easy-to-use logging class that supports various types of log output including console, file, and server-side output. It uses the singleton pattern to ensure there's only one global instance, making it incredibly convenient to use throughout your application without explicit setup.
 
 ### Installation
 
 Install via NuGet Package Manager:
 
-```
+~~~
 dotnet add package Log78
-```
+~~~
 
-### Usage
+### Quick Start
 
-```csharp
+Log78 is designed for immediate use with zero configuration. Here's how simple it is to get started:
+
+~~~csharp
 using www778878net.log;
 
+// Get the Log78 instance - no setup required!
 var log = Log78.Instance;
-log.setup(serverLogger, fileLogger, consoleLogger);
 
+// Create a log entry
 var logEntry = new LogEntry();
-logEntry.Basic.Message = "Hello, world!";
+logEntry.Basic.Message = "Hello, Log78!";
+
+// Log the message
 log.INFO(logEntry);
-```
+~~~
+
+That's it! Log78 is ready to use out of the box with default console and file logging.
+
+### Advanced Configuration (Optional)
+
+If you need custom logging behavior, you can use the `setup` method:
+
+~~~csharp
+// Create custom logger instances if needed
+var serverLogger = new ServerLog78();
+var fileLogger = new FileLog78("custom_logfile");
+var consoleLogger = new ConsoleLog78();
+
+// Setup custom loggers
+log.setup(serverLogger, fileLogger, consoleLogger);
+~~~
 
 ### Properties
 
@@ -55,10 +73,10 @@ log.INFO(logEntry);
 
 ### Example: Adjusting Log Levels
 
-```csharp
+~~~csharp
 using www778878net.log;
 var log = Log78.Instance;
-log.setup(serverLogger, fileLogger, consoleLogger);
+
 // Adjust console log level to 0 to print all logs (for debugging)
 log.LevelConsole = 0;
 // Adjust file log level to 60 to only record more severe warnings and errors
@@ -77,75 +95,41 @@ log.WARN(logEntry); // Will be recorded in both console and file
 
 logEntry.Basic.Message = "Error";
 log.ERROR(logEntry); // Will be recorded in console, file, and API
-```
+~~~
 
 ### Methods
 
-- `setup`: Sets up logger instances.
 - `DEBUG`, `INFO`, `WARN`, `ERROR`: Record logs of different levels.
 - `ERROR(Exception, LogEntry)`: Records exception error logs.
 
-### Custom Log Entries
+### Using the LogEntry Class
 
-You can create custom log entries by inheriting from the `LogEntry` class:
+The `LogEntry` class provides structured information for detailed logging:
 
-```csharp
-public class CustomLogEntry : LogEntry
-{
-    public DateTime Date { get; set; }
-    public string Weather { get; set; }
+~~~csharp
+var logEntry = new LogEntry();
+logEntry.Basic.Summary = "User login successful";
+logEntry.Basic.LogLevelNumber = 50;
+logEntry.Basic.LogLevel = "INFO";
+logEntry.Basic.Message = "User johndoe successfully logged into the system";
+logEntry.Basic.ServiceName = "AuthService";
+logEntry.Basic.UserId = "user123";
+logEntry.Basic.UserName = "johndoe";
 
-    public CustomLogEntry()
-    {
-        Date = DateTime.Now;
-        Weather = "Unknown";
-        Basic.HostName = Environment.MachineName;
-        Basic.UserName = Environment.UserName;
-    }
-}
+logEntry.Event.EventCategory = "authentication";
+logEntry.Event.EventAction = "login";
+logEntry.Event.EventOutcome = "success";
 
-// Using a custom log entry
-var customEntry = new CustomLogEntry
-{
-    Basic = { Message = "Test message", Summary = "Test summary" },
-    Weather = "Sunny"
-};
-log.INFO(customEntry);
-```
+logEntry.Http.HttpRequestMethod = "POST";
+logEntry.Http.HttpRequestBodyContent = "{\"username\":\"johndoe\",\"password\":\"*****\"}";
+logEntry.Http.HttpResponseStatusCode = 200;
+logEntry.Http.UrlOriginal = "https://api.example.com/login";
 
-### Example
+// Add custom properties
+logEntry.AddProperty("customField", "customValue");
 
-```csharp
-using www778878net.log;
-
-// Create logger instances
-var serverLogger = new ServerLog78();
-var fileLogger = new FileLog78("logfile");
-var consoleLogger = new ConsoleLog78();
-
-// Get the Log78 instance
-var log = Log78.Instance;
-
-// Setup the logger
-log.setup(serverLogger, fileLogger, consoleLogger);
-
-// Log an information message
-var infoEntry = new LogEntry();
-infoEntry.Basic.Message = "This is an info message.";
-log.INFO(infoEntry);
-
-// Log an error message
-try
-{
-    throw new Exception("Something went wrong!");
-}
-catch (Exception error)
-{
-    var errorEntry = new LogEntry();
-    errorEntry.Basic.Message = "An error occurred.";
-    log.ERROR(error, errorEntry);
-}
-```
+log.INFO(logEntry);
+~~~
 
 ### Other
 

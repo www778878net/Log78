@@ -126,11 +126,11 @@ namespace Test78
     public async Task TestLogstashServerLog78()
     {
       // 设置
-      var logstashUrl = "http://192.168.32.122:5000";
+      var logstashUrl = "http://192.168.31.122:5000";
       var logstashLogger = new LogstashServerLog78(logstashUrl);
       var log = Log78.Instance;
       log.setup(logstashLogger, null, null);
-      log.LevelApi = 0; // 确保所有日志都会被发送到 Logstash
+      log.LevelApi = 50; // 确保所有日志都会被发送到 Logstash
 
       // 创建测试日志条目
       var testEntry = new LogEntry

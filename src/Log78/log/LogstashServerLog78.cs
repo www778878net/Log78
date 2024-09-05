@@ -29,7 +29,7 @@ namespace www778878net.log
         {
             try
             {
-                string jsonContent = JsonConvert.SerializeObject(logEntry);
+                string jsonContent = logEntry.ToJson();
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
                 var response = await _httpClient.PostAsync(ServerUrl, content);

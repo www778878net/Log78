@@ -4,12 +4,10 @@
 
 [English](./README.md) | 简体中文
 
-
 [![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![测试状态](https://github.com/www778878net/Log78/actions/workflows/BuildandTest.yml/badge.svg?branch=main)](https://github.com/www778878net/Log78/actions/workflows/BuildandTest.yml)
 [![QQ群](https://img.shields.io/badge/QQ群-323397913-blue.svg?style=flat-square&color=12b7f5&logo=qq)](https://qm.qq.com/cgi-bin/qm/qr?k=it9gUUVdBEDWiTOH21NsoRHAbE9IAzAO&jump_from=webapi&authKey=KQwSXEPwpAlzAFvanFURm0Foec9G9Dak0DmThWCexhqUFbWzlGjAFC7t0jrjdKdL)
 </div>
-
 
 ## 反馈QQ群（点击加入）：[323397913](https://qm.qq.com/cgi-bin/qm/qr?k=it9gUUVdBEDWiTOH21NsoRHAbE9IAzAO&jump_from=webapi&authKey=KQwSXEPwpAlzAFvanFURm0Foec9G9Dak0DmThWCexhqUFbWzlGjAFC7t0jrjdKdL)
 
@@ -17,28 +15,49 @@
 
 ### 概述
 
-`Log78` 是一个用于封装日志记录功能的类，支持多种类型的日志输出，包括控制台输出、文件输出以及服务器端输出。该类采用单例模式确保全局只有一个实例，并提供了设置不同日志级别的方法。
+`Log78` 是一个强大且易用的日志记录类，支持多种类型的日志输出，包括控制台输出、文件输出以及服务器端输出。它采用单例模式确保全局只有一个实例，无需显式设置即可在整个应用程序中方便使用。
 
 ### 安装
 
 通过 NuGet 包管理器安装：
 
-```
+~~~
 dotnet add package Log78 
-```
+~~~
 
-### 使用
+### 快速开始
 
-```csharp
+Log78 设计为零配置即可使用。以下是如何快速开始：
+
+~~~csharp
 using www778878net.log;
 
+// 获取 Log78 实例 - 无需设置！
 var log = Log78.Instance;
-log.setup(serverLogger, fileLogger, consoleLogger);
 
+// 创建日志条目
 var logEntry = new LogEntry();
-logEntry.Basic.Message = "Hello, world!";
+logEntry.Basic.Message = "你好，Log78！";
+
+// 记录日志
 log.INFO(logEntry);
-```
+~~~
+
+就是这么简单！Log78 开箱即用，默认支持控制台和文件日志记录。
+
+### 高级配置（可选）
+
+如果需要自定义日志行为，可以使用 `setup` 方法：
+
+~~~csharp
+// 根据需要创建自定义日志记录器实例
+var serverLogger = new ServerLog78();
+var fileLogger = new FileLog78("custom_logfile");
+var consoleLogger = new ConsoleLog78();
+
+// 设置自定义日志记录器
+log.setup(serverLogger, fileLogger, consoleLogger);
+~~~
 
 ### 属性
 
@@ -55,13 +74,13 @@ log.INFO(logEntry);
 
 ### 示例: 调整日志级别
 
-```csharp
+~~~csharp
 using www778878net.log;
 var log = Log78.Instance;
-log.setup(serverLogger, fileLogger, consoleLogger);
-// 调整控制台日志级别为0,以打印所有日志(用于调试)
+
+// 调整控制台日志级别为0，以打印所有日志（用于调试）
 log.LevelConsole = 0;
-// 调整文件日志级别为60,只记录较严重的警告和错误
+// 调整文件日志级别为60，只记录较严重的警告和错误
 log.LevelFile = 60;
 
 // 使用不同级别记录日志
@@ -77,75 +96,41 @@ log.WARN(logEntry); // 控制台和文件都会记录
 
 logEntry.Basic.Message = "错误";
 log.ERROR(logEntry); // 控制台、文件和API都会记录
-```
+~~~
 
 ### 方法
 
-- `setup`: 设置日志记录器实例。
 - `DEBUG`, `INFO`, `WARN`, `ERROR`: 记录不同级别的日志。
 - `ERROR(Exception, LogEntry)`: 记录异常错误日志。
 
-### 自定义日志条目
+### 使用 LogEntry 类
 
-您可以通过继承 `LogEntry` 类来创建自定义的日志条目：
+`LogEntry` 类提供了结构化的信息，可以更详细地记录日志：
 
-```csharp
-public class CustomLogEntry : LogEntry
-{
-    public DateTime Date { get; set; }
-    public string Weather { get; set; }
+~~~csharp
+var logEntry = new LogEntry();
+logEntry.Basic.Summary = "用户登录成功";
+logEntry.Basic.LogLevelNumber = 50;
+logEntry.Basic.LogLevel = "INFO";
+logEntry.Basic.Message = "用户 johndoe 成功登录系统";
+logEntry.Basic.ServiceName = "AuthService";
+logEntry.Basic.UserId = "user123";
+logEntry.Basic.UserName = "johndoe";
 
-    public CustomLogEntry()
-    {
-        Date = DateTime.Now;
-        Weather = "Unknown";
-        Basic.HostName = Environment.MachineName;
-        Basic.UserName = Environment.UserName;
-    }
-}
+logEntry.Event.EventCategory = "authentication";
+logEntry.Event.EventAction = "login";
+logEntry.Event.EventOutcome = "success";
 
-// 使用自定义日志条目
-var customEntry = new CustomLogEntry
-{
-    Basic = { Message = "Test message", Summary = "Test summary" },
-    Weather = "Sunny"
-};
-log.INFO(customEntry);
-```
+logEntry.Http.HttpRequestMethod = "POST";
+logEntry.Http.HttpRequestBodyContent = "{\"username\":\"johndoe\",\"password\":\"*****\"}";
+logEntry.Http.HttpResponseStatusCode = 200;
+logEntry.Http.UrlOriginal = "https://api.example.com/login";
 
-### 示例
+// 添加自定义属性
+logEntry.AddProperty("customField", "customValue");
 
-```csharp
-using www778878net.log;
-
-// 创建日志记录器实例
-var serverLogger = new ServerLog78();
-var fileLogger = new FileLog78("logfile");
-var consoleLogger = new ConsoleLog78();
-
-// 获取 Log78 实例
-var log = Log78.Instance;
-
-// 设置日志记录器
-log.setup(serverLogger, fileLogger, consoleLogger);
-
-// 记录一条信息日志
-var infoEntry = new LogEntry();
-infoEntry.Basic.Message = "This is an info message.";
-log.INFO(infoEntry);
-
-// 记录一条错误日志
-try
-{
-    throw new Exception("Something went wrong!");
-}
-catch (Exception error)
-{
-    var errorEntry = new LogEntry();
-    errorEntry.Basic.Message = "An error occurred.";
-    log.ERROR(error, errorEntry);
-}
-```
+log.INFO(logEntry);
+~~~
 
 ### 其他
 
