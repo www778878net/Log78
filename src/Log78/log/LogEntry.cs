@@ -190,9 +190,9 @@ namespace www778878net.log
     /// </summary>
     public string? UserName { get; set; }
     /// <summary>
-    /// 日志索引用于elk
+    /// 日志索引用于elk index1,index2
     /// </summary>
-    public string[]? LogIndex { get; set; }
+    public string? LogIndex { get; set; }
   }
 
   public class EventInfo
