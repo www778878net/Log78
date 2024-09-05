@@ -15,20 +15,22 @@ namespace www778878net.log
         public string ServerUrl { get; set; }
         private readonly HttpClient _httpClient;
         private readonly Log78 _logger;
-        private readonly int _errorLevel;
+      
         /// <summary>
         /// 
         /// </summary>
         /// <param name="serverUrl"></param>
         /// <param name="errorLevel">Must be less than Log78's LevelApi to avoid potential infinite loops</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when errorLevel is greater than or equal to Log78's LevelApi</exception>
-        public LogstashServerLog78(string serverUrl, int errorLevel = 50)
+        public LogstashServerLog78(string serverUrl,int LevelFile=50)
         {
             ServerUrl = serverUrl;
-            ValidateErrorLevel(errorLevel);
+           
             _httpClient = new HttpClient();
-            _logger = Log78.Instance;
-            _errorLevel = errorLevel;
+            _logger =  new Log78();
+            _logger.LevelApi=99999;//直接就没设置 我们就是
+            _logger.LevelConsole=LevelFile;//必然是出错了
+            _logger.LevelFile=LevelFile;//必然是出错了
         }
 
         private void ValidateErrorLevel(int errorLevel)
@@ -40,43 +42,22 @@ namespace www778878net.log
             }
         }
 
-        public async void LogToServer(LogEntry logEntry)
+        public async Task LogToServer(LogEntry logEntry)
         {
-            try
-            {
-                string jsonContent = logEntry.ToJson();
-                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            string jsonContent = logEntry.ToJson();
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync(ServerUrl, content);
+            var response = await _httpClient.PostAsync(ServerUrl, content);
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    var errorEntry = new LogEntry
-                    {
-                        Basic = new BasicInfo
-                        {
-                            Message = $"Failed to send log to Logstash. Status code: {response.StatusCode}",
-                            Summary = "Logstash Error",
-                            LogLevel = "ERROR",                            
-                        }
-                    };
-                    _logger.ERROR(errorEntry, _errorLevel);  // 使用最低级别，避免再次发送到服务器
-                }
-            }
-            catch (Exception ex)
+            if (response.IsSuccessStatusCode)
             {
-                var errorEntry = new LogEntry
-                {
-                    Basic = new BasicInfo
-                    {
-                        Message = $"Error sending log to Logstash: {ex.Message}",
-                        Summary = "Logstash Exception",
-                        LogLevel = "ERROR",
-                       
-                    }
-                };
-                _logger.ERROR(errorEntry, _errorLevel);  // 使用最低级别，避免再次发送到服务器
+                _logger.DEBUG("Logstash log sent successfully");
+                return;
             }
+            
+            var errorMessage = $"Failed to send log to Logstash. Status code: {response.StatusCode}";
+            _logger.ERROR(errorMessage, "Logstash Error", 50);
+            throw new HttpRequestException(errorMessage);
         }
 
         public void Dispose()

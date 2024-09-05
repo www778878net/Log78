@@ -15,7 +15,7 @@ namespace www778878net.log
     public int LevelApi { get; set; } = 70;
     private IServerLog78? serverLogger;
     private IConsoleLog78? consoleLogger = new ConsoleLog78();
-    private IFileLog78? fileLogger;
+    private IFileLog78? fileLogger= new FileLog78();
 
     // 公共的静态方法，用于获取单例实例
     private static Log78? instance;
@@ -182,34 +182,34 @@ namespace www778878net.log
 
     public LogEntry? DebugEntry { get; set; }
 
-    public void DEBUG(string message, string summary = "", int level = 10)
+    public void DEBUG(string summary, string message = "", int level = 10)
     {
-        LogWithLevel("DEBUG", message, summary, level);
+        LogWithLevel("DEBUG", summary, message, level);
     }
 
-    public void INFO(string message, string summary = "", int level = 50)
+    public void INFO(string summary, string message = "", int level = 50)
     {
-        LogWithLevel("INFO", message, summary, level);
+        LogWithLevel("INFO", summary, message, level);
     }
 
-    public void WARN(string message, string summary = "", int level = 50)
+    public void WARN(string summary, string message = "", int level = 50)
     {
-        LogWithLevel("WARN", message, summary, level);
+        LogWithLevel("WARN", summary, message, level);
     }
 
-    public void ERROR(string message, string summary = "", int level = 70)
+    public void ERROR(string summary, string message = "", int level = 70)
     {
-        LogWithLevel("ERROR", message, summary, level);
+        LogWithLevel("ERROR", summary, message, level);
     }
 
-    public void ERROR(Exception error, string message = "", string summary = "", int level = 70)
+    public void ERROR(Exception error, string summary = "", string message = "", int level = 70)
     {
         var logEntry = new LogEntry
         {
             Basic = new BasicInfo
             {
-                Message = string.IsNullOrEmpty(message) ? error.Message : message,
                 Summary = string.IsNullOrEmpty(summary) ? error.GetType().Name : summary,
+                Message = string.IsNullOrEmpty(message) ? error.Message : message,
                 LogLevel = "ERROR",
                 LogLevelNumber = level
             },
@@ -224,14 +224,14 @@ namespace www778878net.log
         ProcessLog(logEntry);
     }
 
-    private void LogWithLevel(string logLevel, string message, string summary, int level)
+    private void LogWithLevel(string logLevel, string summary, string message, int level)
     {
         var logEntry = new LogEntry
         {
             Basic = new BasicInfo
             {
-                Message = message,
                 Summary = summary,
+                Message = message,
                 LogLevel = logLevel,
                 LogLevelNumber = level
             }
