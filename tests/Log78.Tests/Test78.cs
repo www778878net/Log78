@@ -37,11 +37,11 @@ namespace Test78
     public async Task TestSetup()
     {
       var log = Log78.Instance;
-      var logstashLogger = new LogstashServerLog78("http://localhost:5000");
+      //var logstashLogger = new LogstashServerLog78("http://localhost:5000");
       var fileLogger = new FileLog78("testlogs");
       var consoleLogger = new ConsoleLog78();
 
-      log.setup(logstashLogger, fileLogger, consoleLogger);
+      log.setup(null, fileLogger, consoleLogger);
 
       // 使用日志方法来间接测试记录器是否被正确设置
       var testEntry = new LogEntry();
@@ -68,7 +68,7 @@ namespace Test78
       log.LevelConsole = 30;
 
       // 清理
-      logstashLogger.Dispose();
+      //logstashLogger.Dispose();
       fileLogger.Dispose();
       consoleLogger.Dispose();
 
