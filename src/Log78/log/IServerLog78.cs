@@ -21,7 +21,6 @@ namespace www778878net.log
     public interface IServerLog78
     {
         string ServerUrl { get; set; }
-        void LogToServer(LogEntry logEntry);
-        void SendLogFile(string menu, string logFile);
+        void LogToServer(LogEntry logEntry);        
     }
 }

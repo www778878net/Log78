@@ -122,6 +122,10 @@ namespace www778878net.log
         /// 用户名
         /// </summary>
         public string UserName { get; set; }
+        /// <summary>
+        /// 日志索引用于elk
+        /// </summary>
+        public string LogiIndex { get; set; }
     }
 
     public class EventInfo
