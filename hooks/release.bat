@@ -87,13 +87,13 @@ git commit -m "Bump version to !new_version!"
 REM Create an annotated tag with the changes
 git tag -a v!new_version! -m "Release version !new_version!"
 
-REM Push the commit and tag to main
-git push origin main
-git push origin v!new_version!
+@REM REM Push the commit and tag to main
+@REM git push origin main
+@REM git push origin v!new_version!
 
-REM Switch to develop branch and merge changes from main
-git checkout develop
-git merge main
+@REM REM Switch to develop branch and merge changes from main
+@REM git checkout develop
+@REM git merge main
 
 echo Release process completed. New version %new_version% has been tagged and pushed to main. Changes merged to develop branch (not pushed).
 
