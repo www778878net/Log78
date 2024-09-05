@@ -32,12 +32,7 @@ if not exist "%project_file%" (
 
 echo Found project file: %project_file%
 
-REM Fetch the latest changes from remote
-git fetch origin
 
-REM Update main branch
-git checkout main
-git pull origin main
 
 
 REM Get current version
@@ -87,11 +82,11 @@ git commit -m "Bump version to !new_version!"
 REM Create an annotated tag with the changes
 git tag -a v!new_version! -m "Release version !new_version!"
 
-REM Push the commit and tag to main
+@REM REM Push the commit and tag to main
 git push origin main
 git push origin v!new_version!
 
-REM Switch to develop branch and merge changes from main
+@REM REM Switch to develop branch and merge changes from main
 git checkout develop
 git merge main
 
