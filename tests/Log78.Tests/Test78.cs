@@ -34,7 +34,7 @@ namespace Test78
     }
 
     [TestMethod]
-    public void TestSetup()
+    public async Task TestSetup()
     {
       var log = Log78.Instance;
       var logstashLogger = new LogstashServerLog78("http://localhost:5000");
@@ -49,17 +49,17 @@ namespace Test78
 
       // 测试 API 日志
       log.LevelApi = 0; // 确保 API 日志会被记录
-      log.INFO(testEntry);
+      await log.INFO(testEntry);
       // 注意：由于LogstashServerLog78实际发送HTTP请求，我们可能需要模拟HTTP响应或使用实际的Logstash服务器
 
       // 测试文件日志
       log.LevelFile = 0; // 确保文件日志会被记录
-      log.INFO(testEntry);
+      await log.INFO(testEntry);
       // 注意：由于FileLog78实际写入文件，我们可能需要检查文件是否被创建或修改
 
       // 测试控制台日志
       log.LevelConsole = 0; // 确保控制台日志会被记录
-      log.INFO(testEntry);
+      await log.INFO(testEntry);
       // 注意：由于ConsoleLog78实际写入控制台，我们可能需要重定向控制台输出来验证
 
       // 重置日志级别
@@ -92,7 +92,7 @@ namespace Test78
     }
 
     [TestMethod]
-    public void TestCustomLogEntry()
+    public async Task TestCustomLogEntry()
     {
       var log = Log78.Instance;
        
@@ -104,7 +104,7 @@ namespace Test78
           Weather = "Sunny"
       };
 
-      log.INFO(customEntry);
+      await log.INFO(customEntry);
 
       // 注意：由于我们使用实际的ConsoleLog78，我们可能需要重定向控制台输出来验证日志内容
       // 这里我们只能确保不抛出异常
@@ -114,7 +114,7 @@ namespace Test78
     }
 
     [TestMethod]
-    public void TestCustomLogEntryWithException()
+    public async Task TestCustomLogEntryWithException()
     {
       var log = Log78.Instance;
      
@@ -122,7 +122,7 @@ namespace Test78
       var customEntry = new CustomLogEntry();
       var exception = new Exception("Test exception");
 
-      log.ERROR(exception, customEntry);
+      await log.ERROR(exception, customEntry);
 
       // 同样，我们可能需要重定向控制台输出来验证日志内容
       Assert.IsTrue(true, "异常日志记录应该完成而不抛出异常");
@@ -156,7 +156,7 @@ namespace Test78
       };
 
       // 发送日志
-      log.INFO(testEntry);
+      await log.INFO(testEntry);
 
       // 等待一段时间，确保日志有时间被发送
       await Task.Delay(2000);
@@ -171,7 +171,7 @@ namespace Test78
     }
 
     [TestMethod]
-    public void TestFileLog78()
+    public async Task TestFileLog78()
     {
         // 设置
         var log = Log78.Instance;
@@ -193,7 +193,7 @@ namespace Test78
         };
 
         // 写入日志
-        log.INFO(testEntry);
+        await log.INFO(testEntry);
 
         // 验证
         string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");

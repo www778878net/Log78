@@ -184,7 +184,7 @@ namespace www778878net.log
         /// <summary>
         /// 日志索引用于elk
         /// </summary>
-        public string[]? LogiIndex { get; set; }
+        public string[]? LogIndex { get; set; }
     }
 
     public class EventInfo
