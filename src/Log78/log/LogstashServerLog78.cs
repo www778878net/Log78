@@ -33,7 +33,7 @@ namespace www778878net.log
             _logger.LevelFile = levelFile; // 必然是出错了
         }
 
-        public async Task LogToServer(LogEntry logEntry)
+        public async Task<HttpResponseMessage> LogToServer(LogEntry logEntry)
         {
             try
             {
@@ -45,6 +45,7 @@ namespace www778878net.log
                 if (response.IsSuccessStatusCode)
                 {
                     await _logger.DEBUG("Logstash log sent successfully", "Logstash Success");
+                    return response;
                 }
                 else
                 {
@@ -52,6 +53,7 @@ namespace www778878net.log
                     await _logger.ERROR(errorMessage, "Logstash Error");
                     throw new HttpRequestException(errorMessage);
                 }
+            
             }
             catch (Exception ex)
             {
