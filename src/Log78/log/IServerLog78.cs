@@ -13,14 +13,13 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace www778878net.log
 {
     public interface IServerLog78
     {
         string ServerUrl { get; set; }
-        void LogToServer(LogEntry logEntry);        
+        Task LogToServer(LogEntry logEntry);
     }
 }
