@@ -20,35 +20,43 @@ English | [简体中文](./README.cn.md)
 
 Install via NuGet Package Manager:
 
-~~~
+```
 dotnet add package Log78
-~~~
+```
 
 ### Quick Start
 
-Log78 is designed for immediate use with zero configuration. Here's how simple it is to get started:
+Log78 offers two ways to log messages: a simple method for quick logging and a more detailed method using `LogEntry` objects. Here's how to get started with the simple method:
 
-~~~csharp
+```csharp
 using www778878net.log;
 
 // Get the Log78 instance - no setup required!
 var log = Log78.Instance;
 
-// Create a log entry
+// Log a simple message
+log.INFO("Hello, Log78!");
+
+// Log with a summary and custom level
+log.WARN("This is a warning", "Warning Summary", 60);
+```
+
+For more detailed logging, you can use the `LogEntry` object:
+
+```csharp
 var logEntry = new LogEntry();
-logEntry.Basic.Message = "Hello, Log78!";
-
-// Log the message
+logEntry.Basic.Message = "Detailed log message";
+logEntry.Basic.Summary = "Log Summary";
 log.INFO(logEntry);
-~~~
+```
 
-That's it! Log78 is ready to use out of the box with default console and file logging.
+Both methods are ready to use out of the box with default console and file logging.
 
 ### Advanced Configuration (Optional)
 
 If you need custom logging behavior, you can use the `setup` method:
 
-~~~csharp
+```csharp
 // Create custom logger instances if needed
 var serverLogger = new ServerLog78();
 var fileLogger = new FileLog78("custom_logfile");
@@ -56,7 +64,7 @@ var consoleLogger = new ConsoleLog78();
 
 // Setup custom loggers
 log.setup(serverLogger, fileLogger, consoleLogger);
-~~~
+```
 
 ### Properties
 
@@ -73,7 +81,7 @@ log.setup(serverLogger, fileLogger, consoleLogger);
 
 ### Example: Adjusting Log Levels
 
-~~~csharp
+```csharp
 using www778878net.log;
 var log = Log78.Instance;
 
@@ -95,7 +103,7 @@ log.WARN(logEntry); // Will be recorded in both console and file
 
 logEntry.Basic.Message = "Error";
 log.ERROR(logEntry); // Will be recorded in console, file, and API
-~~~
+```
 
 ### Methods
 
@@ -106,7 +114,7 @@ log.ERROR(logEntry); // Will be recorded in console, file, and API
 
 The `LogEntry` class provides structured information for detailed logging:
 
-~~~csharp
+```csharp
 var logEntry = new LogEntry();
 logEntry.Basic.Summary = "User login successful";
 logEntry.Basic.LogLevelNumber = 50;
@@ -129,7 +137,7 @@ logEntry.Http.UrlOriginal = "https://api.example.com/login";
 logEntry.AddProperty("customField", "customValue");
 
 log.INFO(logEntry);
-~~~
+```
 
 ### Other
 

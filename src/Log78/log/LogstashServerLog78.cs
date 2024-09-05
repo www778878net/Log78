@@ -7,8 +7,8 @@ using Newtonsoft.Json;
 namespace www778878net.log
 {
     /// <summary>
-    /// Logstash 日志服务器 
-    /// *注意Log78的LevelApi 如果设置为50以下，发送到Logstash的日志失败会死循环
+    /// Logstash server logger
+    /// *Note: If errorLevel is greater than or equal to Log78's LevelApi, it may cause an infinite loop when sending logs to Logstash fails
     /// </summary>
     public class LogstashServerLog78 : IServerLog78, IDisposable
     {
@@ -16,13 +16,28 @@ namespace www778878net.log
         private readonly HttpClient _httpClient;
         private readonly Log78 _logger;
         private readonly int _errorLevel;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="serverUrl"></param>
+        /// <param name="errorLevel">Must be less than Log78's LevelApi to avoid potential infinite loops</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when errorLevel is greater than or equal to Log78's LevelApi</exception>
         public LogstashServerLog78(string serverUrl, int errorLevel = 50)
         {
             ServerUrl = serverUrl;
+            ValidateErrorLevel(errorLevel);
             _httpClient = new HttpClient();
             _logger = Log78.Instance;
             _errorLevel = errorLevel;
+        }
+
+        private void ValidateErrorLevel(int errorLevel)
+        {
+            if (errorLevel >= Log78.Instance.LevelApi)
+            {
+                throw new ArgumentOutOfRangeException(nameof(errorLevel), 
+                    $"Error level must be less than Log78's LevelApi ({Log78.Instance.LevelApi}). Current value ({errorLevel}) may cause an infinite loop when sending logs to Logstash fails.");
+            }
         }
 
         public async void LogToServer(LogEntry logEntry)

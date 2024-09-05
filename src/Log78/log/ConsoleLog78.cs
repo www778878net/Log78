@@ -24,15 +24,12 @@ namespace www778878net.log
 
         public ConsoleLog78()
         {
-            ConfigureLogger();
-        }
-
-        private void ConfigureLogger()
-        {
-            _logger = new LoggerConfiguration()
+             _logger = new LoggerConfiguration()
                 .WriteTo.Console()
                 .CreateLogger();
+             
         }
+ 
 
         public void WriteLine(LogEntry logEntry)
         {

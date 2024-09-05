@@ -21,35 +21,43 @@
 
 通过 NuGet 包管理器安装：
 
-~~~
+```
 dotnet add package Log78 
-~~~
+```
 
 ### 快速开始
 
-Log78 设计为零配置即可使用。以下是如何快速开始：
+Log78 提供两种记录日志的方法：一种是简单快速的方法，另一种是使用 `LogEntry` 对象的更详细方法。以下是如何使用简单方法快速开始：
 
-~~~csharp
+```csharp
 using www778878net.log;
 
 // 获取 Log78 实例 - 无需设置！
 var log = Log78.Instance;
 
-// 创建日志条目
+// 记录简单消息
+log.INFO("你好，Log78！");
+
+// 记录带摘要和自定义级别的日志
+log.WARN("这是一个警告", "警告摘要", 60);
+```
+
+对于更详细的日志记录，您可以使用 `LogEntry` 对象：
+
+```csharp
 var logEntry = new LogEntry();
-logEntry.Basic.Message = "你好，Log78！";
-
-// 记录日志
+logEntry.Basic.Message = "详细的日志消息";
+logEntry.Basic.Summary = "日志摘要";
 log.INFO(logEntry);
-~~~
+```
 
-就是这么简单！Log78 开箱即用，默认支持控制台和文件日志记录。
+这两种方法都可以开箱即用，默认支持控制台和文件日志记录。
 
 ### 高级配置（可选）
 
 如果需要自定义日志行为，可以使用 `setup` 方法：
 
-~~~csharp
+```csharp
 // 根据需要创建自定义日志记录器实例
 var serverLogger = new ServerLog78();
 var fileLogger = new FileLog78("custom_logfile");
@@ -57,7 +65,7 @@ var consoleLogger = new ConsoleLog78();
 
 // 设置自定义日志记录器
 log.setup(serverLogger, fileLogger, consoleLogger);
-~~~
+```
 
 ### 属性
 
@@ -74,7 +82,7 @@ log.setup(serverLogger, fileLogger, consoleLogger);
 
 ### 示例: 调整日志级别
 
-~~~csharp
+```csharp
 using www778878net.log;
 var log = Log78.Instance;
 
@@ -96,7 +104,7 @@ log.WARN(logEntry); // 控制台和文件都会记录
 
 logEntry.Basic.Message = "错误";
 log.ERROR(logEntry); // 控制台、文件和API都会记录
-~~~
+```
 
 ### 方法
 
@@ -107,7 +115,7 @@ log.ERROR(logEntry); // 控制台、文件和API都会记录
 
 `LogEntry` 类提供了结构化的信息，可以更详细地记录日志：
 
-~~~csharp
+```csharp
 var logEntry = new LogEntry();
 logEntry.Basic.Summary = "用户登录成功";
 logEntry.Basic.LogLevelNumber = 50;
@@ -130,7 +138,7 @@ logEntry.Http.UrlOriginal = "https://api.example.com/login";
 logEntry.AddProperty("customField", "customValue");
 
 log.INFO(logEntry);
-~~~
+```
 
 ### 其他
 

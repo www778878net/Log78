@@ -122,7 +122,7 @@ namespace www778878net.log
         /// <summary>
         /// 日志的摘要信息
         /// </summary>
-        public string Summary { get; set; }
+        public string? Summary { get; set; }
 
         /// <summary>
         /// 日志的数字等级，用于控制日志的输出位置
@@ -138,46 +138,46 @@ namespace www778878net.log
         /// <summary>
         /// 日志级别，如 INFO, WARN, ERROR 等
         /// </summary>
-        public string LogLevel { get; set; }
+        public string? LogLevel { get; set; }
 
         /// <summary>
         /// 主要的日志消息内容
         /// </summary>
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
         /// <summary>
         /// 产生日志的主机名
         /// </summary>
-        public string HostName { get; set; }
+        public string? HostName { get; set; }
 
         /// <summary>
         /// 服务名称 原apiv
         /// </summary>
-        public string ServiceName { get; set; }
+        public string? ServiceName { get; set; }
 
         /// <summary>
         /// 服务对象 原apiobj
         /// </summary>
-        public string ServiceObj { get; set; }
+        public string? ServiceObj { get; set; }
 
         /// <summary>
         /// 服务函数 原apifun
         /// </summary>
-        public string ServiceFun { get; set; }
+        public string? ServiceFun { get; set; }
 
         /// <summary>
         /// 用户唯一标识符
         /// </summary>
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
 
         /// <summary>
         /// 用户名
         /// </summary>
-        public string UserName { get; set; }
+        public string? UserName { get; set; }
         /// <summary>
         /// 日志索引用于elk
         /// </summary>
-        public string LogiIndex { get; set; }
+        public string[]? LogiIndex { get; set; }
     }
 
     public class EventInfo
@@ -190,22 +190,22 @@ namespace www778878net.log
         /// <summary>
         /// 事件类型，如 alert, event, metric, state 等
         /// </summary>
-        public string EventKind { get; set; }
+        public string? EventKind { get; set; }
 
         /// <summary>
         /// 事件类别，如 authentication, database, network 等
         /// </summary>
-        public string EventCategory { get; set; }
+        public string? EventCategory { get; set; }
 
         /// <summary>
         /// 具体动作，如 login, logout, purchase 等
         /// </summary>
-        public string EventAction { get; set; }
+        public string? EventAction { get; set; }
 
         /// <summary>
         /// 事件结果，如 success, failure 等
         /// </summary>
-        public string EventOutcome { get; set; }
+        public string? EventOutcome { get; set; }
 
         /// <summary>
         /// 事件持续时间（毫秒）
@@ -215,7 +215,7 @@ namespace www778878net.log
         /// <summary>
         /// 事务 ID
         /// </summary>
-        public string TransactionId { get; set; }
+        public string? TransactionId { get; set; }
     }
 
     public class ErrorInfo
@@ -223,17 +223,17 @@ namespace www778878net.log
         /// <summary>
         /// 错误类型
         /// </summary>
-        public string ErrorType { get; set; }
+        public string? ErrorType { get; set; }
 
         /// <summary>
         /// 错误消息
         /// </summary>
-        public string ErrorMessage { get; set; }
+        public string? ErrorMessage { get; set; }
 
         /// <summary>
         /// 错误堆栈（适用于开发环境）
         /// </summary>
-        public string ErrorStackTrace { get; set; }
+        public string? ErrorStackTrace { get; set; }
     }
 
     public class HttpInfo
@@ -241,12 +241,12 @@ namespace www778878net.log
         /// <summary>
         /// HTTP 请求方法
         /// </summary>
-        public string HttpRequestMethod { get; set; }
+        public string? HttpRequestMethod { get; set; }
 
         /// <summary>
         /// HTTP 请求体内容
         /// </summary>
-        public string HttpRequestBodyContent { get; set; }
+        public string? HttpRequestBodyContent { get; set; }
 
         /// <summary>
         /// HTTP 响应状态码
@@ -256,7 +256,7 @@ namespace www778878net.log
         /// <summary>
         /// 原始 URL
         /// </summary>
-        public string UrlOriginal { get; set; }
+        public string? UrlOriginal { get; set; }
     }
 
     public class TraceInfo
@@ -264,11 +264,11 @@ namespace www778878net.log
         /// <summary>
         /// 分布式追踪 ID
         /// </summary>
-        public string TraceId { get; set; }
+        public string? TraceId { get; set; }
 
         /// <summary>
         /// 单个追踪中的 span ID
         /// </summary>
-        public string SpanId { get; set; }
+        public string? SpanId { get; set; }
     }
 }
