@@ -32,74 +32,72 @@ if "!current_branch!" == "develop" (
 
     echo Pre-push checks for develop branch completed.
 ) else if "!current_branch!" == "main" (
-    echo 当前分支是 main。运行发布流程...
+    echo Current branch is main. Running release process...
 
-    REM 直接在 pre-push.bat 中执行发布流程，而不是调用 release.bat
-    
-    REM 获取项目名称
+    REM Get project name
     for %%I in (.) do set "project_name=%%~nxI"
-    echo 处理项目：%project_name%
+    echo Processing project: %project_name%
 
-    REM 设置项目文件路径
+    REM Set project file path
     set "project_file=src\%project_name%\%project_name%.csproj"
 
-    REM 检查项目文件是否存在
+    REM Check if project file exists
     if not exist "%project_file%" (
-        echo 未找到项目文件：%project_file%
-        echo 退出...
+        echo Project file not found: %project_file%
+        echo Exiting...
         exit /b 1
     )
 
-    echo 找到项目文件：%project_file%
+    echo Found project file: %project_file%
 
-    REM 获取当前版本
+    REM Get current version
     for /f "tokens=3 delims=<>" %%a in ('findstr "<PackageVersion>" "!project_file!"') do set "current_version=%%a"
     if not defined current_version (
-        echo 在 !project_file! 中未找到 PackageVersion。退出...
+        echo PackageVersion not found in !project_file!. Exiting...
         exit /b 1
     )
-    echo 当前版本：!current_version!
+    echo Current version: !current_version!
 
-    REM 构建发布版本
-    echo 构建发布版本...
+    REM Build release version
+    echo Building release version...
     dotnet build -c Release
     if !errorlevel! neq 0 (
-        echo 构建失败。退出...
+        echo Build failed. Exiting...
         exit /b 1
     )
 
-    REM 运行测试
-    echo 运行测试...
+    REM Run tests
+    echo Running tests...
     dotnet test
     if !errorlevel! neq 0 (
-        echo 测试失败。退出...
+        echo Tests failed. Exiting...
         exit /b 1
     )
 
-    REM 增加补丁版本号
+    REM Increment patch version
     for /f "tokens=1-3 delims=." %%a in ("!current_version!") do (
         set /a patch=%%c+1
         set "new_version=%%a.%%b.!patch!"
     )
-    echo 新版本：!new_version!
+    echo New version: !new_version!
 
-    REM 更新项目文件中的版本号
+    REM Update version in project file
     powershell -Command "(Get-Content '!project_file!') -replace '<PackageVersion>!current_version!</PackageVersion>', '<PackageVersion>!new_version!</PackageVersion>' | Set-Content '!project_file!'"
 
-    echo !project_name! (!project_file!) 的版本已更新
+    echo Version updated for !project_name! (!project_file!)
 
-    REM 暂存更改的项目文件
+    REM Stage the changed project file
     git add "!project_file!"
 
-    REM 提交版本变更
-    git commit -m "将版本号提升到 !new_version!"
+    REM Commit the version change
+    git commit -m "Bump version to !new_version!"
 
-    REM 创建带注释的标签
-    git tag -a v!new_version! -m "发布版本 !new_version!"
+    REM Create an annotated tag
+    git tag -a v!new_version! -m "Release version !new_version!"
 
-    echo 发布流程完成。新版本 %new_version% 已标记。请手动推送更改和标签。
+    echo Release process completed. New version %new_version% has been tagged. Please push changes and tags manually.
 
-    REM 注意：不要在这里自动推送，以避免循环触发 pre-push 钩子
+    REM Note: Do not push automatically here to avoid triggering the pre-push hook in a loop
 
     echo Release process completed. Merging changes to develop...
 
