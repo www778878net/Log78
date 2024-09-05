@@ -42,46 +42,22 @@ namespace www778878net.log
             }
         }
 
-        public async void LogToServer(LogEntry logEntry)
+        public async Task LogToServer(LogEntry logEntry)
         {
-            try
-            {
-                string jsonContent = logEntry.ToJson();
-                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            string jsonContent = logEntry.ToJson();
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync(ServerUrl, content);
+            var response = await _httpClient.PostAsync(ServerUrl, content);
 
-                if (response.IsSuccessStatusCode){
-                  _logger.DEBUG("ok");
-                  return;
-                }
-                
-                var errorEntry = new LogEntry
-                {
-                    Basic = new BasicInfo
-                    {
-                        Message = $"Failed to send log to Logstash. Status code: {response.StatusCode}",
-                        Summary = "Logstash Error",
-                        LogLevel = "ERROR",                            
-                    }
-                };
-                _logger.ERROR(errorEntry, 50);  // 使用最低级别，避免再次发送到服务器
-                
-            }
-            catch (Exception ex)
+            if (response.IsSuccessStatusCode)
             {
-                var errorEntry = new LogEntry
-                {
-                    Basic = new BasicInfo
-                    {
-                        Message = $"Error sending log to Logstash: {ex.Message}",
-                        Summary = "Logstash Exception",
-                        LogLevel = "ERROR",
-                       
-                    }
-                };
-                _logger.ERROR(errorEntry, 50);  // 使用最低级别，避免再次发送到服务器
+                _logger.DEBUG("Logstash log sent successfully");
+                return;
             }
+            
+            var errorMessage = $"Failed to send log to Logstash. Status code: {response.StatusCode}";
+            _logger.ERROR(errorMessage, "Logstash Error", 50);
+            throw new HttpRequestException(errorMessage);
         }
 
         public void Dispose()
