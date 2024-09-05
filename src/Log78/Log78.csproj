@@ -2,9 +2,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net48;net6.0</TargetFrameworks>
-    <LangVersion>8.0</LangVersion>
-    <!-- 移除 Nullable 设置 -->
-    <ImplicitUsings>disable</ImplicitUsings>     
+    <LangVersion>10.0</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
     <Deterministic>false</Deterministic>
     <PackageVersion>2.0.5</PackageVersion>
@@ -16,12 +16,21 @@
     <PackageProjectUrl>http://www.778878.net</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/www778878net/Log78.git</RepositoryUrl>
-     <PackageTags>7788;www778878net;log;logging;logger;diagnostics;tracing;error-handling;debugging;monitoring;performance;analytics;日志;日志记录;错误处理;调试;监控;性能;分析</PackageTags>
+    <PackageTags>7788;www778878net;log;logging;logger;diagnostics;tracing;error-handling;debugging;monitoring;performance;analytics</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RootNamespace>www778878net</RootNamespace>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <Description>Log78 is a class for encapsulating logging functionality, supporting various types of log output including console, file, and server-side output. It uses the singleton pattern to ensure only one instance globally and provides methods for setting different log levels.</Description>
+    <Description>
+Log78 is a powerful and easy-to-use logging library for .NET applications. Key features include:
+- Ready to use out of the box with zero configuration
+- Singleton pattern for global consistency
+- Flexible log level control
+- Structured logging with rich metadata
+- Customizable output targets (console, file, server)
+- Support for both .NET Framework and .NET Core
+Ideal for projects requiring a simple yet robust logging solution.
+    </Description>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\README.md">
@@ -34,5 +43,6 @@
     <PackageReference Include="Serilog" Version="4.0.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 </Project>

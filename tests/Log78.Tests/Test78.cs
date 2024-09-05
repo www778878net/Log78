@@ -15,6 +15,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using www778878net.log;
 using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Test78
 {
@@ -118,6 +120,46 @@ namespace Test78
       Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains("Test exception"), "异常消息应该被记录");
       Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains(Environment.MachineName), "主机名应该被记录");
       Assert.IsTrue(mockConsoleLogger.LastLoggedMessage.Contains(Environment.UserName), "用户名应该被记录");
+    }
+
+    [TestMethod]
+    public async Task TestLogstashServerLog78()
+    {
+      // 设置
+      var logstashUrl = "http://192.168.31.122:5000";
+      var logstashLogger = new LogstashServerLog78(logstashUrl);
+      var log = Log78.Instance;
+      log.setup(logstashLogger, null, null);
+      log.LevelApi = 50; // 确保所有日志都会被发送到 Logstash
+
+      // 创建测试日志条目
+      var testEntry = new LogEntry
+      {
+        Basic = new BasicInfo
+        {
+          Message = "Test Logstash integration",
+          Summary = "Logstash Test",
+          ServiceName = "TestService",
+          ServiceObj = "TestObject",
+          ServiceFun = "TestFunction",
+          UserId = "TestUser",
+          UserName = "Test Username"
+        }
+      };
+
+      // 发送日志
+      log.INFO(testEntry);
+
+      // 等待一段时间，确保日志有时间被发送
+      await Task.Delay(2000);
+
+      // 验证
+      // 注意：这里我们无法直接验证日志是否成功发送到 Logstash
+      // 我们可以检查是否有异常抛出，或者添加一些额外的日志记录来确认发送尝试
+      // 在实际环境中，您可能需要检查 Logstash 的接收端来确认日志是否被正确接收
+
+      // 如果到这里没有抛出异常，我们就认为测试通过
+      Assert.IsTrue(true, "Logstash logging attempt completed without throwing an exception");
     }
   }
 

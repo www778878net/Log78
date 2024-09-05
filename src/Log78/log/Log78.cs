@@ -56,28 +56,31 @@ namespace www778878net.log
 
     }
 
-    public void DEBUG(LogEntry logEntry)
+    public void DEBUG(LogEntry logEntry, int level = 10)
     {
       logEntry.Basic.LogLevel = "DEBUG";
-      ProcessLog(logEntry, 10); // 假设 DEBUG 级别为 10
+      logEntry.Basic.LogLevelNumber = level;
+      ProcessLog(logEntry);
     }
 
-    public void INFO(LogEntry logEntry)
+    public void INFO(LogEntry logEntry, int level = 50)
     {
       logEntry.Basic.LogLevel = "INFO";
-      ProcessLog(logEntry, 50); // 假设 INFO 级别为 20
+      logEntry.Basic.LogLevelNumber = level;
+      ProcessLog(logEntry);
     }
 
-    public void WARN(LogEntry logEntry)
+    public void WARN(LogEntry logEntry, int level = 50)
     {
       logEntry.Basic.LogLevel = "WARN";
-      ProcessLog(logEntry, 50); // 假设 WARN 级别为 30
+      logEntry.Basic.LogLevelNumber = level;
+      ProcessLog(logEntry);
     }
 
-    public void ERROR(Exception error, LogEntry logEntry)
+    public void ERROR(Exception error, LogEntry logEntry, int level = 70)
     {
       logEntry.Basic.LogLevel = "ERROR";
-      logEntry.Basic.LogLevelNumber = 70; // 使用 ERROR 的日志级别
+      logEntry.Basic.LogLevelNumber = level;
 
       // 将错误信息写入 LogEntry 的 ErrorInfo 中
       logEntry.Error.ErrorType = error.GetType().FullName;
@@ -96,30 +99,31 @@ namespace www778878net.log
         logEntry.Basic.Message = $"{error.GetType().Name}: {error.Message}";
       }
 
-      ProcessLog(logEntry, 70);
+      ProcessLog(logEntry);
     }
 
-    public void ERROR(LogEntry logEntry)
+    public void ERROR(LogEntry logEntry, int level = 70)
     {
       logEntry.Basic.LogLevel = "ERROR";
-      ProcessLog(logEntry, 70); // 假设 ERROR 级别为 40
+      logEntry.Basic.LogLevelNumber = level;
+      ProcessLog(logEntry);
     }
 
-    private void ProcessLog(LogEntry logEntry, int level)
+    private void ProcessLog(LogEntry logEntry)
     {
       bool isdebug = IsDebugKey(logEntry);
 
-      if (isdebug || level >= LevelApi)
+      if (isdebug || logEntry.Basic.LogLevelNumber >= LevelApi)
       {
         serverLogger?.LogToServer(logEntry);
       }
 
-      if (isdebug || level >= LevelFile)
+      if (isdebug || logEntry.Basic.LogLevelNumber >= LevelFile)
       {
         fileLogger?.LogToFile(logEntry);
       }
 
-      if (isdebug || level >= LevelConsole)
+      if (isdebug || logEntry.Basic.LogLevelNumber >= LevelConsole)
       {
         consoleLogger?.WriteLine(logEntry);
       }
