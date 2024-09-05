@@ -10,9 +10,13 @@ namespace www778878net.log
         public string Menu { get; set; }
         private Logger _logger;
 
-        public FileLog78(string menu = "logs")
+        public FileLog78(string menu = "logs",string filename="7788_.log")
         {
             Menu = menu;
+            string logFileName = Path.Combine(menu, filename);
+            _logger = new LoggerConfiguration()
+                .WriteTo.File(logFileName, rollingInterval: RollingInterval.Hour)
+                .CreateLogger();
             ConfigureLogger();
         }
 
@@ -21,10 +25,7 @@ namespace www778878net.log
             string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Menu);
             Directory.CreateDirectory(logDirectory);
 
-            string logFileName = Path.Combine(logDirectory, $"7788_.log");
-            _logger = new LoggerConfiguration()
-                .WriteTo.File(logFileName, rollingInterval: RollingInterval.Hour)
-                .CreateLogger();
+            
         }
 
         public void LogToFile(LogEntry logEntry)
