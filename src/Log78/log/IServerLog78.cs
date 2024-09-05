@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace www778878net.log
@@ -20,6 +21,6 @@ namespace www778878net.log
     public interface IServerLog78
     {
         string ServerUrl { get; set; }
-        Task LogToServer(LogEntry logEntry);
+         Task<HttpResponseMessage> LogToServer(LogEntry logEntry);
     }
 }
