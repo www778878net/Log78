@@ -11,9 +11,9 @@ namespace www778878net.log
   public class Log78
   {
     public HashSet<string> debugKind = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-    public int LevelFile { get; set; } = 50;
-    public int LevelConsole { get; set; } = 30;
-    public int LevelApi { get; set; } = 70;
+    public int LevelFile { get; set; } = 30;
+    public int LevelConsole { get; set; } = 60;
+    public int LevelApi { get; set; } = 50;
     private IServerLog78? serverLogger;
     private IConsoleLog78? consoleLogger = new ConsoleLog78();
     private IFileLog78? fileLogger= new FileLog78();
@@ -78,7 +78,7 @@ namespace www778878net.log
       await ProcessLog(logEntry);
     }
 
-    public async Task ERROR(Exception error, LogEntry logEntry, int level = 70)
+    public async Task ERROR(Exception error, LogEntry logEntry, int level = 60)
     {
       logEntry.Basic.LogLevel = "ERROR";
       logEntry.Basic.LogLevelNumber = level;
@@ -103,7 +103,7 @@ namespace www778878net.log
       await ProcessLog(logEntry);
     }
 
-    public async Task ERROR(LogEntry logEntry, int level = 70)
+    public async Task ERROR(LogEntry logEntry, int level = 60)
     {
       logEntry.Basic.LogLevel = "ERROR";
       logEntry.Basic.LogLevelNumber = level;
@@ -201,12 +201,12 @@ namespace www778878net.log
         await LogWithLevel("WARN", summary, message, level);
     }
 
-    public async Task ERROR(string summary, string message = "", int level = 70)
+    public async Task ERROR(string summary, string message = "", int level = 60)
     {
         await LogWithLevel("ERROR", summary, message, level);
     }
 
-    public async Task ERROR(Exception error, string summary = "", string message = "", int level = 70)
+    public async Task ERROR(Exception error, string summary = "", string message = "", int level = 60)
     {
         var logEntry = new LogEntry
         {
