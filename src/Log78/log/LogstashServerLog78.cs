@@ -33,31 +33,32 @@ namespace www778878net.log
             _logger.LevelFile=LevelFile;//必然是出错了
         }
 
-        private void ValidateErrorLevel(int errorLevel)
-        {
-            if (errorLevel >= Log78.Instance.LevelApi)
-            {
-                throw new ArgumentOutOfRangeException(nameof(errorLevel), 
-                    $"Error level must be less than Log78's LevelApi ({Log78.Instance.LevelApi}). Current value ({errorLevel}) may cause an infinite loop when sending logs to Logstash fails.");
-            }
-        }
-
         public async Task LogToServer(LogEntry logEntry)
         {
-            string jsonContent = logEntry.ToJson();
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync(ServerUrl, content);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                _logger.DEBUG("Logstash log sent successfully");
-                return;
+                string jsonContent = logEntry.ToJson();
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync(ServerUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.DEBUG("Logstash log sent successfully", "Logstash Success");
+                }
+                else
+                {
+                    var errorMessage = $"Failed to send log to Logstash. Status code: {response.StatusCode}";
+                    _logger.ERROR(errorMessage, "Logstash Error");
+                    throw new HttpRequestException(errorMessage);
+                }
             }
-            
-            var errorMessage = $"Failed to send log to Logstash. Status code: {response.StatusCode}";
-            _logger.ERROR(errorMessage, "Logstash Error", 50);
-            throw new HttpRequestException(errorMessage);
+            catch (Exception ex)
+            {
+                var errorMessage = $"Error sending log to Logstash: {ex.Message}";
+                _logger.ERROR(errorMessage, "Logstash Exception");
+                throw; // 重新抛出异常，让调用者知道发生了错误
+            }
         }
 
         public void Dispose()
