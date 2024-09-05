@@ -32,31 +32,20 @@ if "!current_branch!" == "develop" (
 
     echo Pre-push checks for develop branch completed.
 ) else if "!current_branch!" == "main" (
-    echo Current branch is main. Running release process...
+    echo Current branch is main. Running release process... 
 
-    REM Run release.bat
-    if exist "%~dp0release.bat" (
-        call "%~dp0release.bat"
-        echo release.bat is found
-        exit /b 1
-      ) else (
-          echo release.bat not found
-          exit /b 1
-      )
-
-    echo Release process completed. Merging changes to develop...
 
     @REM REM Store the current commit hash
-    @REM for /f "delims=" %%i in ('git rev-parse HEAD') do set "current_commit=%%i"
+    for /f "delims=" %%i in ('git rev-parse HEAD') do set "current_commit=%%i"
 
-    @REM REM Switch to develop branch
-    @REM git checkout develop
+    REM Switch to develop branch
+    git checkout develop
 
-    @REM REM Pull latest changes from remote develop
-    @REM git pull origin develop
+    REM Pull latest changes from remote develop
+    git pull origin develop
 
-    @REM REM Merge changes from main
-    @REM git merge !current_commit!
+    REM Merge changes from main
+    git merge !current_commit!
 
     @REM echo Merged changes from main to develop. Please review and push manually if everything looks good.
 ) else (

@@ -83,7 +83,7 @@ REM Create an annotated tag with the changes
 git tag -a v!new_version! -m "Release version !new_version!"
 
 @REM REM Push the commit and tag to main
-@REM git push origin main
+git push origin main
 git push origin v!new_version!
 
 @REM REM Switch to develop branch and merge changes from main
