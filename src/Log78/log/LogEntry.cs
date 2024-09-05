@@ -127,6 +127,7 @@ namespace www778878net.log
         /// <summary>
         /// 日志的数字等级，用于控制日志的输出位置
         /// 例如：70-云端，50-本地文件，30-控制台
+        /// 一般不用设置 外面设置后写入
         /// </summary>
         public int LogLevelNumber { get; set; }
 
@@ -154,11 +155,17 @@ namespace www778878net.log
         /// 服务名称 原apiv
         /// </summary>
         public string? ServiceName { get; set; }
-
-        /// <summary>
+             /// <summary>
+        /// 服务对象 原apimenu
+        /// </summary>
+        public string? ServiceMenu { get; set; }
+        
+          /// <summary>
         /// 服务对象 原apiobj
         /// </summary>
         public string? ServiceObj { get; set; }
+
+   
 
         /// <summary>
         /// 服务函数 原apifun
