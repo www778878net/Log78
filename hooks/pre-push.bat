@@ -41,7 +41,7 @@ if "!current_branch!" == "develop" (
     REM Set project file path
     set "project_file=src\%project_name%\%project_name%.csproj"
 
-    REM Check if project file exists
+    REM Check if project  file exists
     if not exist "%project_file%" (
         echo Project file not found: %project_file%
         echo Exiting...
