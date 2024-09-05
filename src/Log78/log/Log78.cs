@@ -109,8 +109,14 @@ namespace www778878net.log
       ProcessLog(logEntry);
     }
 
-    private void ProcessLog(LogEntry logEntry)
+    private void ProcessLog(LogEntry? logEntry)
     {
+      if (logEntry?.Basic == null)
+      {
+        ERROR(new LogEntry { Basic = new BasicInfo { Message = "Error: LogEntry or LogEntry.Basic is null" } });
+        return;
+      }
+
       bool isdebug = IsDebugKey(logEntry);
 
       if (isdebug || logEntry.Basic.LogLevelNumber >= LevelApi)
@@ -136,20 +142,25 @@ namespace www778878net.log
       {
         // 如果设置了 DebugEntry，进行精细控制检查
         return
-            (!string.IsNullOrEmpty(DebugEntry.Basic.ServiceName) &&
+            (DebugEntry.Basic.ServiceName != null &&
+             logEntry.Basic.ServiceName != null &&
              DebugEntry.Basic.ServiceName.Equals(logEntry.Basic.ServiceName, StringComparison.OrdinalIgnoreCase)) ||
-            (!string.IsNullOrEmpty(DebugEntry.Basic.ServiceObj) &&
+            (DebugEntry.Basic.ServiceObj != null &&
+             logEntry.Basic.ServiceObj != null &&
              DebugEntry.Basic.ServiceObj.Equals(logEntry.Basic.ServiceObj, StringComparison.OrdinalIgnoreCase)) ||
-            (!string.IsNullOrEmpty(DebugEntry.Basic.ServiceFun) &&
+            (DebugEntry.Basic.ServiceFun != null &&
+             logEntry.Basic.ServiceFun != null &&
              DebugEntry.Basic.ServiceFun.Equals(logEntry.Basic.ServiceFun, StringComparison.OrdinalIgnoreCase)) ||
-            (!string.IsNullOrEmpty(DebugEntry.Basic.UserId) &&
+            (DebugEntry.Basic.UserId != null &&
+             logEntry.Basic.UserId != null &&
              DebugEntry.Basic.UserId.Equals(logEntry.Basic.UserId, StringComparison.OrdinalIgnoreCase)) ||
-            (!string.IsNullOrEmpty(DebugEntry.Basic.UserName) &&
+            (DebugEntry.Basic.UserName != null &&
+             logEntry.Basic.UserName != null &&
              DebugEntry.Basic.UserName.Equals(logEntry.Basic.UserName, StringComparison.OrdinalIgnoreCase));
       }
 
       // 如果没有设置 DebugEntry，则检查 debugKind 集合
-      string[] keysToCheck = new[]
+      string?[] keysToCheck = new[]
       {
                 logEntry.Basic.ServiceName,
                 logEntry.Basic.ServiceObj,
@@ -160,7 +171,7 @@ namespace www778878net.log
 
       foreach (var key in keysToCheck)
       {
-        if (!string.IsNullOrEmpty(key) && debugKind.Contains(key))
+        if (key != null && debugKind.Contains(key))
         {
           return true;
         }
@@ -170,5 +181,64 @@ namespace www778878net.log
     }
 
     public LogEntry? DebugEntry { get; set; }
+
+    public void DEBUG(string message, string summary = "", int level = 10)
+    {
+        LogWithLevel("DEBUG", message, summary, level);
+    }
+
+    public void INFO(string message, string summary = "", int level = 50)
+    {
+        LogWithLevel("INFO", message, summary, level);
+    }
+
+    public void WARN(string message, string summary = "", int level = 50)
+    {
+        LogWithLevel("WARN", message, summary, level);
+    }
+
+    public void ERROR(string message, string summary = "", int level = 70)
+    {
+        LogWithLevel("ERROR", message, summary, level);
+    }
+
+    public void ERROR(Exception error, string message = "", string summary = "", int level = 70)
+    {
+        var logEntry = new LogEntry
+        {
+            Basic = new BasicInfo
+            {
+                Message = string.IsNullOrEmpty(message) ? error.Message : message,
+                Summary = string.IsNullOrEmpty(summary) ? error.GetType().Name : summary,
+                LogLevel = "ERROR",
+                LogLevelNumber = level
+            },
+            Error = new ErrorInfo
+            {
+                ErrorType = error.GetType().FullName,
+                ErrorMessage = error.Message,
+                ErrorStackTrace = error.StackTrace
+            }
+        };
+
+        ProcessLog(logEntry);
+    }
+
+    private void LogWithLevel(string logLevel, string message, string summary, int level)
+    {
+        var logEntry = new LogEntry
+        {
+            Basic = new BasicInfo
+            {
+                Message = message,
+                Summary = summary,
+                LogLevel = logLevel,
+                LogLevelNumber = level
+            }
+        };
+
+        ProcessLog(logEntry);
+    }
+
   }
 }

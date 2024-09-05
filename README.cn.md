@@ -27,7 +27,7 @@ dotnet add package Log78
 
 ### 快速开始
 
-Log78 设计为零配置即可使用。以下是如何快速开始：
+Log78 提供两种记录日志的方法：一种是简单快速的方法，另一种是使用 `LogEntry` 对象的更详细方法。以下是如何使用简单方法快速开始：
 
 ~~~csharp
 using www778878net.log;
@@ -35,15 +35,23 @@ using www778878net.log;
 // 获取 Log78 实例 - 无需设置！
 var log = Log78.Instance;
 
-// 创建日志条目
-var logEntry = new LogEntry();
-logEntry.Basic.Message = "你好，Log78！";
+// 记录简单消息
+log.INFO("你好，Log78！");
 
-// 记录日志
+// 记录带摘要和自定义级别的日志
+log.WARN("这是一个警告", "警告摘要", 60);
+~~~
+
+对于更详细的日志记录，您可以使用 `LogEntry` 对象：
+
+~~~csharp
+var logEntry = new LogEntry();
+logEntry.Basic.Message = "详细的日志消息";
+logEntry.Basic.Summary = "日志摘要";
 log.INFO(logEntry);
 ~~~
 
-就是这么简单！Log78 开箱即用，默认支持控制台和文件日志记录。
+这两种方法都可以开箱即用，默认支持控制台和文件日志记录。
 
 ### 高级配置（可选）
 

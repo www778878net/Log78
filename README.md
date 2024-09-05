@@ -26,7 +26,7 @@ dotnet add package Log78
 
 ### Quick Start
 
-Log78 is designed for immediate use with zero configuration. Here's how simple it is to get started:
+Log78 offers two ways to log messages: a simple method for quick logging and a more detailed method using `LogEntry` objects. Here's how to get started with the simple method:
 
 ~~~csharp
 using www778878net.log;
@@ -34,15 +34,23 @@ using www778878net.log;
 // Get the Log78 instance - no setup required!
 var log = Log78.Instance;
 
-// Create a log entry
-var logEntry = new LogEntry();
-logEntry.Basic.Message = "Hello, Log78!";
+// Log a simple message
+log.INFO("Hello, Log78!");
 
-// Log the message
+// Log with a summary and custom level
+log.WARN("This is a warning", "Warning Summary", 60);
+~~~
+
+For more detailed logging, you can use the `LogEntry` object:
+
+~~~csharp
+var logEntry = new LogEntry();
+logEntry.Basic.Message = "Detailed log message";
+logEntry.Basic.Summary = "Log Summary";
 log.INFO(logEntry);
 ~~~
 
-That's it! Log78 is ready to use out of the box with default console and file logging.
+Both methods are ready to use out of the box with default console and file logging.
 
 ### Advanced Configuration (Optional)
 
