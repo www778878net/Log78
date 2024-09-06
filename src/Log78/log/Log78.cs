@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace www778878net.log
 {
@@ -112,31 +113,52 @@ namespace www778878net.log
 
     private async Task ProcessLog(LogEntry? logEntry)
     {
-      if (logEntry?.Basic == null)
+      await Task.Factory.StartNew(async () =>
       {
-        await ERROR(new LogEntry { Basic = new BasicInfo { Message = "Error: LogEntry or LogEntry.Basic is null" } });
-        return;
-      }
-
-      bool isdebug = IsDebugKey(logEntry);
-
-      if (isdebug || logEntry.Basic.LogLevelNumber >= LevelApi)
-      {
-        if (serverLogger != null)
+        if (logEntry?.Basic == null)
         {
-          await serverLogger.LogToServer(logEntry);
+          await ERROR(new LogEntry { Basic = new BasicInfo { Message = "Error: LogEntry or LogEntry.Basic is null" } }).ConfigureAwait(false);
+          return;
         }
-      }
 
-      if (isdebug || logEntry.Basic.LogLevelNumber >= LevelFile)
-      {
-        fileLogger?.LogToFile(logEntry);
-      }
+        bool isdebug = IsDebugKey(logEntry);
 
-      if (isdebug || logEntry.Basic.LogLevelNumber >= LevelConsole)
-      {
-        consoleLogger?.WriteLine(logEntry);
-      }
+        if (isdebug || logEntry.Basic.LogLevelNumber >= LevelApi)
+        {
+          if (serverLogger != null)
+          {
+            try
+            {
+              var logTask = serverLogger.LogToServer(logEntry);
+              var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30));
+
+              var completedTask = await Task.WhenAny(logTask, timeoutTask).ConfigureAwait(false);
+              if (completedTask == timeoutTask)
+              {
+                Console.WriteLine("Server logging timed out");
+              }
+              else
+              {
+                await logTask.ConfigureAwait(false);
+              }
+            }
+            catch (Exception ex)
+            {
+              Console.WriteLine($"Error in server logging: {ex.Message}");
+            }
+          }
+        }
+
+        if (isdebug || logEntry.Basic.LogLevelNumber >= LevelFile)
+        {
+          fileLogger?.LogToFile(logEntry);
+        }
+
+        if (isdebug || logEntry.Basic.LogLevelNumber >= LevelConsole)
+        {
+          consoleLogger?.WriteLine(logEntry);
+        }
+      }, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default).Unwrap();
     }
 
     private bool IsDebugKey(LogEntry logEntry)

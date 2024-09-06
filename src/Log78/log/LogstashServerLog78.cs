@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -17,7 +18,8 @@ namespace www778878net.log
         public bool ThrowOnError { get; set; } = false;
         private readonly HttpClient _httpClient;
         private readonly Log78 _logger;
-      
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(10); // 限制最大并发请求数为10
+
         /// <summary>
         /// 
         /// </summary>
@@ -29,6 +31,7 @@ namespace www778878net.log
             ServerUrl = serverUrl;
            
             _httpClient = new HttpClient();
+            _httpClient.Timeout = TimeSpan.FromSeconds(30); // 设置30秒超时
             _logger = new Log78();
             _logger.LevelApi = 99999; // 直接就没设置 我们就是
             _logger.LevelConsole = levelFile; // 必然是出错了
@@ -37,36 +40,68 @@ namespace www778878net.log
 
         public async Task<HttpResponseMessage?> LogToServer(LogEntry logEntry)
         {
+            await _semaphore.WaitAsync();
+            try
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+                try
+                {
+                    return await LogToServerInternal(logEntry, cts.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    await _logger.ERROR("LogToServer operation timed out", "Logstash Timeout").ConfigureAwait(false);
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    await _logger.ERROR($"Unexpected error in LogToServer: {ex.Message}", "Logstash Error").ConfigureAwait(false);
+                    return null;
+                }
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        private async Task<HttpResponseMessage?> LogToServerInternal(LogEntry logEntry, CancellationToken cancellationToken)
+        {
             try
             {
                 string jsonContent = logEntry.ToJson();
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync(ServerUrl, content);
+                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+
+                var response = await _httpClient.PostAsync(ServerUrl, content, linkedCts.Token).ConfigureAwait(false);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await _logger.DEBUG("Logstash log sent successfully", "Logstash Success");
-                    return response;
+                    await _logger.DEBUG("Logstash log sent successfully", "Logstash Success").ConfigureAwait(false);
                 }
                 else
                 {
                     var errorMessage = $"Failed to send log to Logstash. Status code: {response.StatusCode}";
-                    await _logger.ERROR(errorMessage, "Logstash Error");
-                    // 根据 ThrowOnError 属性决定是否抛出异常
+                    await _logger.ERROR(errorMessage, "Logstash Error").ConfigureAwait(false);
                     if (ThrowOnError)
                     {
                         throw new HttpRequestException(errorMessage);
                     }
-                    return response;
                 }
-            
+                return response;
+            }
+            catch (OperationCanceledException)
+            {
+                await _logger.ERROR("HTTP request was canceled or timed out", "Logstash Canceled").ConfigureAwait(false);
+                return null;
             }
             catch (Exception ex)
             {
                 var errorMessage = $"Error sending log to Logstash: {ex.Message}";
-                await _logger.ERROR(errorMessage, "Logstash Exception");
-                // 根据 ThrowOnError 属性决定是否重新抛出异常
+                await _logger.ERROR(errorMessage, "Logstash Exception").ConfigureAwait(false);
                 if (ThrowOnError)
                 {
                     throw;
