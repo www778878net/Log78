@@ -12,9 +12,9 @@ namespace www778878net.log
   public class Log78
   {
     public HashSet<string> debugKind = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-    public int LevelFile { get; set; } = 30;
+    public int LevelFile { get; set; } = 50;
     public int LevelConsole { get; set; } = 60;
-    public int LevelApi { get; set; } = 50;
+    public int LevelApi { get; set; } = 70;
     private IServerLog78? serverLogger;
     private IConsoleLog78? consoleLogger = new ConsoleLog78();
     private IFileLog78? fileLogger= new FileLog78();
