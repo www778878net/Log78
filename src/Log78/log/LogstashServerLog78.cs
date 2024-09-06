@@ -14,7 +14,7 @@ namespace www778878net.log
     {
         public string ServerUrl { get; set; }
         // 添加新属性
-        public bool ThrowOnError { get; set; } = true;
+        public bool ThrowOnError { get; set; } = false;
         private readonly HttpClient _httpClient;
         private readonly Log78 _logger;
       
