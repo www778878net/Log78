@@ -32,7 +32,7 @@ Log78 提供两种记录日志的方法：一种是简单快速的方法，另�
 ```csharp
 using www778878net.log;
 
-// 获取 Log78 实例 - 无需设置！
+// 获取 Log78 实例  - 无需设置！
 var log = Log78.Instance;
 
 // 记录简单消息
