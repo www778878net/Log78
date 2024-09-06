@@ -21,6 +21,6 @@ namespace www778878net.log
     public interface IServerLog78
     {
         string ServerUrl { get; set; }
-         Task<HttpResponseMessage> LogToServer(LogEntry logEntry);
+         Task<HttpResponseMessage?> LogToServer(LogEntry logEntry);
     }
 }
