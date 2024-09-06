@@ -13,6 +13,8 @@ namespace www778878net.log
     public class LogstashServerLog78 : IServerLog78, IDisposable
     {
         public string ServerUrl { get; set; }
+        // 添加新属性
+        public bool ThrowOnError { get; set; } = true;
         private readonly HttpClient _httpClient;
         private readonly Log78 _logger;
       
@@ -33,7 +35,7 @@ namespace www778878net.log
             _logger.LevelFile = levelFile; // 必然是出错了
         }
 
-        public async Task<HttpResponseMessage> LogToServer(LogEntry logEntry)
+        public async Task<HttpResponseMessage?> LogToServer(LogEntry logEntry)
         {
             try
             {
@@ -51,7 +53,12 @@ namespace www778878net.log
                 {
                     var errorMessage = $"Failed to send log to Logstash. Status code: {response.StatusCode}";
                     await _logger.ERROR(errorMessage, "Logstash Error");
-                    throw new HttpRequestException(errorMessage);
+                    // 根据 ThrowOnError 属性决定是否抛出异常
+                    if (ThrowOnError)
+                    {
+                        throw new HttpRequestException(errorMessage);
+                    }
+                    return response;
                 }
             
             }
@@ -59,7 +66,12 @@ namespace www778878net.log
             {
                 var errorMessage = $"Error sending log to Logstash: {ex.Message}";
                 await _logger.ERROR(errorMessage, "Logstash Exception");
-                throw;
+                // 根据 ThrowOnError 属性决定是否重新抛出异常
+                if (ThrowOnError)
+                {
+                    throw;
+                }
+                return null;
             }
         }
 
