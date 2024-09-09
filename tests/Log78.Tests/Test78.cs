@@ -253,6 +253,103 @@ namespace Test78
             Assert.AreEqual(60, apiLevel, "API log level should be 60");
         }
 
+        [TestMethod]
+        public async Task TestDebugEntry()
+        {
+            var logger = Log78.Instance;
+            logger.SetEnvironment(Log78.Environment.Development);
+            logger.SetupDetailFile();
+
+            // 设置调试条件
+            logger.DebugEntry = new LogEntry
+            {
+                Basic = new BasicInfo { UserName = "guest" }
+            };
+
+            // 记录一条不满足调试条件的日志
+            await logger.INFO("Normal log", new { UserName = "admin" });
+
+            // 记录一条满足调试条件的日志
+            await logger.INFO("Debug log", new { UserName = "guest" });
+
+            // 验证详细日志文件存在并包含所有日志消息
+            string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "detail.log");
+            Assert.IsTrue(File.Exists(logPath), "Detail log file should exist");
+            string logContent = File.ReadAllText(logPath);
+            Console.WriteLine($"Log content: {logContent}");
+
+            // 解析日志内容
+            var logEntries = logContent.Split(new[] { "<AI_FOCUS_LOG>", "</AI_FOCUS_LOG>" }, StringSplitOptions.RemoveEmptyEntries)
+                                       .Where(json => !string.IsNullOrWhiteSpace(json))
+                                       .Select(json => JObject.Parse(json))
+                                       .ToList();
+
+            Assert.IsTrue(logEntries.Count > 0, "At least one log entry should be parsed");
+
+            // 验证调试日志
+            var debugLogEntry = logEntries.FirstOrDefault(e => e["summary"]?.ToString() == "Debug log");
+            Assert.IsNotNull(debugLogEntry, "Debug log entry should exist");
+            Assert.AreEqual("guest", debugLogEntry["message"]?["UserName"]?.ToString(), "Debug log should contain correct username");
+
+            // 验证普通日志是否被记录（取决于当前的日志级别设置）
+            var normalLogEntry = logEntries.FirstOrDefault(e => e["summary"]?.ToString() == "Normal log");
+            if (logger.GetCurrentLevels().FileLevel <= 30) // INFO level
+            {
+                Assert.IsNotNull(normalLogEntry, "Normal log entry should exist if file log level is INFO or lower");
+            }
+            else
+            {
+                Assert.IsNull(normalLogEntry, "Normal log entry should not exist if file log level is higher than INFO");
+            }
+        }
+
+        [TestMethod]
+        public async Task TestDebugKind()
+        {
+            var logger = Log78.Instance;
+            logger.SetEnvironment(Log78.Environment.Development);
+            logger.SetupDetailFile();
+
+            // 添加调试键
+            logger.AddDebugKey("testuser");
+
+            // 记录一条不满足调试条件的日志
+            await logger.INFO("Normal log", new { UserName = "admin" });
+
+            // 记录一条满足调试条件的日志
+            await logger.INFO("Debug log", new { UserName = "testuser" });
+
+            // 验证详细日志文件存在并包含所有日志消息
+            string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "detail.log");
+            Assert.IsTrue(File.Exists(logPath), "Detail log file should exist");
+            string logContent = File.ReadAllText(logPath);
+            Console.WriteLine($"Log content: {logContent}");
+
+            // 解析日志内容
+            var logEntries = logContent.Split(new[] { "<AI_FOCUS_LOG>", "</AI_FOCUS_LOG>" }, StringSplitOptions.RemoveEmptyEntries)
+                                       .Where(json => !string.IsNullOrWhiteSpace(json))
+                                       .Select(json => JObject.Parse(json))
+                                       .ToList();
+
+            Assert.IsTrue(logEntries.Count > 0, "At least one log entry should be parsed");
+
+            // 验证调试日志
+            var debugLogEntry = logEntries.FirstOrDefault(e => e["summary"]?.ToString() == "Debug log");
+            Assert.IsNotNull(debugLogEntry, "Debug log entry should exist");
+            Assert.AreEqual("testuser", debugLogEntry["message"]?["UserName"]?.ToString(), "Debug log should contain correct username");
+
+            // 验证普通日志是否被记录（取决于当前的日志级别设置）
+            var normalLogEntry = logEntries.FirstOrDefault(e => e["summary"]?.ToString() == "Normal log");
+            if (logger.GetCurrentLevels().FileLevel <= 30) // INFO level
+            {
+                Assert.IsNotNull(normalLogEntry, "Normal log entry should exist if file log level is INFO or lower");
+            }
+            else
+            {
+                Assert.IsNull(normalLogEntry, "Normal log entry should not exist if file log level is higher than INFO");
+            }
+        }
+
         // ... (其他测试方法)
     }
 }

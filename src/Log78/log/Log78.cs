@@ -114,12 +114,25 @@ namespace www778878net.log
       debugFileLogger?.Clear();
     }
 
+    private Dictionary<string, object> customProperties = new Dictionary<string, object>();
+
+    public void AddProperty(string key, object value)
+    {
+      customProperties[key] = value;
+    }
+
     private async Task ProcessLogInternal(LogEntry? logEntry)
     {
       if (logEntry?.Basic == null)
       {
         await ERROR(new LogEntry { Basic = new BasicInfo { Message = "Error: LogEntry or LogEntry.Basic is null" } });
         return;
+      }
+
+      // 添加自定义属性到日志条目
+      foreach (var prop in customProperties)
+      {
+        logEntry.AddProperty(prop.Key, prop.Value);
       }
 
       // 始终写入详细日志，不管当前环境
@@ -318,6 +331,21 @@ namespace www778878net.log
       Production,
       Development,
       Testing
+    }
+
+    public void AddDebugCondition(string key, object value)
+    {
+        if (DebugEntry == null)
+        {
+            DebugEntry = new LogEntry();
+        }
+        DebugEntry.Basic.Message = DebugEntry.Basic.Message ?? new Dictionary<string, object>();
+        ((Dictionary<string, object>)DebugEntry.Basic.Message)[key] = value;
+    }
+
+    public void AddDebugKey(string key)
+    {
+        debugKind.Add(key.ToLower());
     }
   }
 }
