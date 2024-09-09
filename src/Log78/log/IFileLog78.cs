@@ -20,7 +20,7 @@ namespace www778878net.log
 {
     public interface IFileLog78
     {        
-        string Menu { get; set; }
+       
         void LogToFile(LogEntry logEntry);
     }
 }

@@ -19,202 +19,161 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO;
 
-
 namespace Test78
 {
-  [TestClass]
-  public class Log78Tests
-  {
-    [TestMethod]
-    public void TestSingleton()
+    [TestClass]
+    public class Log78Tests
     {
-      var instance1 = Log78.Instance;
-      var instance2 = Log78.Instance;
-      Assert.AreSame(instance1, instance2, "单例模式应该返回相同的实例");
-    }
-
-    [TestMethod]
-    public async Task TestSetup()
-    {
-      var log = Log78.Instance;
-      //var logstashLogger = new LogstashServerLog78("http://localhost:5000");
-      var fileLogger = new FileLog78("testlogs");
-      var consoleLogger = new ConsoleLog78();
-
-      log.setup(null, fileLogger, consoleLogger);
-
-      // 使用日志方法来间接测试记录器是否被正确设置
-      var testEntry = new LogEntry();
-      testEntry.Basic.Message = "Test setup";
-
-      // 测试 API 日志
-      log.LevelApi = 0; // 确保 API 日志会被记录
-      await log.INFO(testEntry);
-      // 注意：由于LogstashServerLog78实际发送HTTP请求，我们可能需要模拟HTTP响应或使用实际的Logstash服务器
-
-      // 测试文件日志
-      log.LevelFile = 0; // 确保文件日志会被记录
-      await log.INFO(testEntry);
-      // 注意：由于FileLog78实际写入文件，我们可能需要检查文件是否被创建或修改
-
-      // 测试控制台日志
-      log.LevelConsole = 0; // 确保控制台日志会被记录
-      await log.INFO(testEntry);
-      // 注意：由于ConsoleLog78实际写入控制台，我们可能需要重定向控制台输出来验证
-
-      // 重置日志级别
-      log.LevelApi = 70;
-      log.LevelFile = 50;
-      log.LevelConsole = 30;
-
-      // 清理
-      //logstashLogger.Dispose();
-      fileLogger.Dispose();
-      consoleLogger.Dispose();
-
-      // 如果到这里没有抛出异常，我们就认为测试通过
-      Assert.IsTrue(true, "Setup completed without throwing an exception");
-    }
-
-    [TestMethod]
-    public void TestClone()
-    {
-      var originalLog = Log78.Instance;
-      originalLog.LevelApi = 80;
-      originalLog.LevelConsole = 40;
-      originalLog.LevelFile = 60;
-
-      var clonedLog = originalLog.Clone();
-
-      Assert.AreEqual(originalLog.LevelApi, clonedLog.LevelApi, "API级别应该相同");
-      Assert.AreEqual(originalLog.LevelConsole, clonedLog.LevelConsole, "控制台级别应该相同");
-      Assert.AreEqual(originalLog.LevelFile, clonedLog.LevelFile, "文件级别应该相同");
-    }
-
-    [TestMethod]
-    public async Task TestCustomLogEntry()
-    {
-      var log = Log78.Instance;
-       
-     
-
-      var customEntry = new CustomLogEntry
-      {
-          Basic = { Message = "Test message", Summary = "Test summary" },
-          Weather = "Sunny"
-      };
-
-      await log.INFO(customEntry);
-
-      // 注意：由于我们使用实际的ConsoleLog78，我们可能需要重定向控制台输出来验证日志内容
-      // 这里我们只能确保不抛出异常
-      Assert.IsTrue(true, "日志记录应该完成而不抛出异常");
-
-       
-    }
-
-    [TestMethod]
-    public async Task TestCustomLogEntryWithException()
-    {
-      var log = Log78.Instance;
-     
-
-      var customEntry = new CustomLogEntry();
-      var exception = new Exception("Test exception");
-
-      await log.ERROR(exception, customEntry);
-
-      // 同样，我们可能需要重定向控制台输出来验证日志内容
-      Assert.IsTrue(true, "异常日志记录应该完成而不抛出异常");
-
-     
-    }
-
-    [TestMethod]
-    public async Task TestLogstashServerLog78()
-    {
-      // 设置
-      var logstashUrl = "http://192.168.31.122:5000";
-      var logstashLogger = new LogstashServerLog78(logstashUrl);
-      var log = Log78.Instance;
-      log.setup(logstashLogger, new FileLog78(), new ConsoleLog78());
-      //log.LevelApi = 50; // 确保所有日志都会被发送到 Logstash
-
-      // 创建测试日志条目
-      var testEntry = new LogEntry
-      {
-        Basic = new BasicInfo
+        [TestInitialize]
+        public void TestInitialize()
         {
-          Message = "Test Logstash integration",
-          Summary = "Logstash Test",
-          ServiceName = "TestService",
-          ServiceObj = "TestObject",
-          ServiceFun = "TestFunction",
-          UserId = "TestUser",
-          UserName = "Test Username"
+            // 重置 Log78 单例实例
+            typeof(Log78).GetField("instance", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static).SetValue(null, null);
         }
-      };
 
-      // 发送日志
-      await log.INFO(testEntry);
-
-      // 等待一段时间，确保日志有时间被发送
-      await Task.Delay(2000);
-
-      // 验证
-      // 注意：这里我们无法直接验证日志是否成功发送到 Logstash
-      // 我们可以检查是否有异常抛出，或者添加一些额外的日志记录来确认发送尝试
-      // 在实际环境中，您可能需要检查 Logstash 的接收端来确认日志是否被正确接收
-
-      // 如果到这里没有抛出异常，我们就认为测试通过
-      Assert.IsTrue(true, "Logstash logging attempt completed without throwing an exception");
-    }
-
-    [TestMethod]
-    public async Task TestFileLog78()
-    {
-        // 设置
-        var log = Log78.Instance;
-        log.LevelFile = 50; // 确保所有日志都会被写入文件
-
-        // 创建测试日志条目
-        var testEntry = new LogEntry
+        [TestMethod]
+        public void TestSingleton()
         {
-            Basic = new BasicInfo
+            var instance1 = Log78.Instance;
+            var instance2 = Log78.Instance;
+            Assert.AreSame(instance1, instance2, "单例模式应该返回相同的实例");
+        }
+
+        [TestMethod]
+        public async Task TestSetup()
+        {
+            var log = Log78.Instance;
+            var fileLogger = new FileLog78("7788_.log", "testlogs");
+            var consoleLogger = new ConsoleLog78();
+
+            log.setup(null, fileLogger, consoleLogger);
+
+            var testEntry = new LogEntry { Basic = new BasicInfo { Message = "Test setup" } };
+
+            await log.INFO(testEntry);
+
+            string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "testlogs");
+            string[] logFiles = Directory.GetFiles(logDirectory, "7788_*.log");
+
+            Assert.IsTrue(logFiles.Length > 0, "应该至少创建了一个日志文件");
+
+            fileLogger.Dispose();
+            consoleLogger.Dispose();
+        }
+
+        [TestMethod]
+        public async Task TestEnvironmentSettings()
+        {
+            Environment.SetEnvironmentVariable("LOG78_ENVIRONMENT", "Development");
+            var log = new Log78();
+            
+            var (fileLevel, consoleLevel, apiLevel) = log.GetCurrentLevels();
+            Assert.AreEqual(20, consoleLevel);
+            Assert.AreEqual(20, fileLevel);
+            Assert.AreEqual(50, apiLevel);
+
+            log.SetEnvironment(Log78.Environment.Production);
+            (fileLevel, consoleLevel, apiLevel) = log.GetCurrentLevels();
+            Assert.AreEqual(60, consoleLevel);
+            Assert.AreEqual(30, fileLevel);
+            Assert.AreEqual(50, apiLevel);
+
+            log.SetEnvironment(Log78.Environment.Testing);
+            (fileLevel, consoleLevel, apiLevel) = log.GetCurrentLevels();
+            Assert.AreEqual(60, consoleLevel);
+            Assert.AreEqual(20, fileLevel);
+            Assert.AreEqual(50, apiLevel);
+
+            // 测试开发环境的调试文件日志
+            log.SetEnvironment(Log78.Environment.Development);
+            string debugMessage = "Debug message for file";
+            await log.DEBUG(new LogEntry { Basic = new BasicInfo { Message = debugMessage } });
+            
+            string debugLogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "detail.log");
+            Assert.IsTrue(File.Exists(debugLogPath), $"Debug log file should exist at {debugLogPath}");
+            if (File.Exists(debugLogPath))
             {
-                Message = "Test file logging",
-                Summary = "File Log Test",
-                ServiceName = "TestService",
-                ServiceObj = "TestObject",
-                ServiceFun = "TestFunction",
-                UserId = "TestUser",
-                UserName = "Test Username"
+                string debugLogContent = File.ReadAllText(debugLogPath);
+                Assert.IsTrue(debugLogContent.Contains(debugMessage), "Debug log should contain the debug message");
             }
-        };
+        }
 
-        // 写入日志
-        await log.INFO(testEntry);
+        [TestMethod]
+        public async Task TestLogLevels()
+        {
+            var log = Log78.Instance;
+            log.SetupDetailFile();
 
-        // 验证
-        string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
-        string[] logFiles = Directory.GetFiles(logDirectory, "7788_*.log");
+            var testEntry = new LogEntry { Basic = new BasicInfo { Message = "Test log levels" } };
 
-        Assert.IsTrue(logFiles.Length > 0, "应该至少创建了一个日志文件");
+            await log.DETAIL(testEntry, 10);
+            await log.DEBUG(testEntry, 20);
+            await log.INFO(testEntry, 30);
+            await log.WARN(testEntry, 50);
+            await log.ERROR(testEntry, 60);
 
-        //file lock can't del
-        //string logContent = File.ReadAllText(logFiles[0]);
-        //Assert.IsTrue(logContent.Contains("Test file logging"), "日志文件应该包含测试消息");
-        //Assert.IsTrue(logContent.Contains("File Log Test"), "日志文件应该包含测试摘要");
+            string detailLogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "detail.log");
+            Assert.IsTrue(File.Exists(detailLogPath), "Detail log file should exist");
 
-        //// 清理
-        //foreach (var file in logFiles)
-        //{
-        //    File.Delete(file);
-        //}
+            if (File.Exists(detailLogPath))
+            {
+                string logContent = File.ReadAllText(detailLogPath);
+                Assert.IsTrue(logContent.Contains("DETAIL"), "Log should contain DETAIL level");
+                Assert.IsTrue(logContent.Contains("DEBUG"), "Log should contain DEBUG level");
+                Assert.IsTrue(logContent.Contains("INFO"), "Log should contain INFO level");
+                Assert.IsTrue(logContent.Contains("WARN"), "Log should contain WARN level");
+                Assert.IsTrue(logContent.Contains("ERROR"), "Log should contain ERROR level");
+            }
+        }
+
+        [TestMethod]
+        public async Task TestCustomLogEntry()
+        {
+            var log = Log78.Instance;
+            log.SetupDetailFile();
+
+            var customEntry = new CustomLogEntry
+            {
+                Basic = { Message = "Test message", Summary = "Test summary" },
+                Weather = "Sunny"
+            };
+
+            await log.INFO(customEntry);
+
+            string detailLogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "detail.log");
+            Assert.IsTrue(File.Exists(detailLogPath), "Detail log file should exist");
+
+            if (File.Exists(detailLogPath))
+            {
+                string logContent = File.ReadAllText(detailLogPath);
+                Assert.IsTrue(logContent.Contains("Test message"), "Log should contain the test message");
+                Assert.IsTrue(logContent.Contains("Sunny"), "Log should contain the custom weather field");
+            }
+        }
+
+        [TestMethod]
+        public async Task TestLogstashServerLog78()
+        {
+            var logstashUrl = "http://localhost:5000"; // 使用本地测试URL
+            var logstashLogger = new LogstashServerLog78(logstashUrl);
+            var log = Log78.Instance;
+            log.setup(logstashLogger, new FileLog78(), new ConsoleLog78());
+
+            var testEntry = new LogEntry
+            {
+                Basic = new BasicInfo
+                {
+                    Message = "Test Logstash integration",
+                    Summary = "Logstash Test",
+                    ServiceName = "TestService"
+                }
+            };
+
+            await log.INFO(testEntry);
+
+            // 注意：这里我们只是测试是否没有抛出异常
+            // 实际项目中，你可能需要一个模拟的Logstash服务器来验证日志是否被正确发送
+            Assert.IsTrue(true, "Logstash logging attempt completed without throwing an exception");
+        }
     }
-  }
-
- 
-
-   
 }

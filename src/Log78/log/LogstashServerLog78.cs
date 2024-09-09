@@ -29,13 +29,11 @@ namespace www778878net.log
         public LogstashServerLog78(string serverUrl, int levelFile = 50)
         {
             ServerUrl = serverUrl;
-           
+            
             _httpClient = new HttpClient();
             _httpClient.Timeout = TimeSpan.FromSeconds(30); // 设置30秒超时
             _logger = new Log78();
-            _logger.LevelApi = 99999; // 直接就没设置 我们就是
-            _logger.LevelConsole = levelFile; // 必然是出错了
-            _logger.LevelFile = levelFile; // 必然是出错了
+            _logger.SetupLevel(levelFile, levelFile, 99999);
         }
 
         public async Task<HttpResponseMessage?> LogToServer(LogEntry logEntry)
@@ -51,12 +49,12 @@ namespace www778878net.log
                 }
                 catch (OperationCanceledException)
                 {
-                    await _logger.ERROR("LogToServer operation timed out", "Logstash Timeout").ConfigureAwait(false);
+                    await _logger.ERROR(new LogEntry { Basic = new BasicInfo { Message = "LogToServer operation timed out", Summary = "Logstash Timeout" } }).ConfigureAwait(false);
                     return null;
                 }
                 catch (Exception ex)
                 {
-                    await _logger.ERROR($"Unexpected error in LogToServer: {ex.Message}", "Logstash Error").ConfigureAwait(false);
+                    await _logger.ERROR(new LogEntry { Basic = new BasicInfo { Message = $"Unexpected error in LogToServer: {ex.Message}", Summary = "Logstash Error" } }).ConfigureAwait(false);
                     return null;
                 }
             }
@@ -80,12 +78,12 @@ namespace www778878net.log
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await _logger.DEBUG("Logstash log sent successfully", "Logstash Success").ConfigureAwait(false);
+                    await _logger.DEBUG(new LogEntry { Basic = new BasicInfo { Message = "Logstash log sent successfully", Summary = "Logstash Success" } }).ConfigureAwait(false);
                 }
                 else
                 {
                     var errorMessage = $"Failed to send log to Logstash. Status code: {response.StatusCode}";
-                    await _logger.ERROR(errorMessage, "Logstash Error").ConfigureAwait(false);
+                    await _logger.ERROR(new LogEntry { Basic = new BasicInfo { Message = errorMessage, Summary = "Logstash Error" } }).ConfigureAwait(false);
                     if (ThrowOnError)
                     {
                         throw new HttpRequestException(errorMessage);
@@ -95,13 +93,13 @@ namespace www778878net.log
             }
             catch (OperationCanceledException)
             {
-                await _logger.ERROR("HTTP request was canceled or timed out", "Logstash Canceled").ConfigureAwait(false);
+                await _logger.ERROR(new LogEntry { Basic = new BasicInfo { Message = "HTTP request was canceled or timed out", Summary = "Logstash Canceled" } }).ConfigureAwait(false);
                 return null;
             }
             catch (Exception ex)
             {
                 var errorMessage = $"Error sending log to Logstash: {ex.Message}";
-                await _logger.ERROR(errorMessage, "Logstash Exception").ConfigureAwait(false);
+                await _logger.ERROR(new LogEntry { Basic = new BasicInfo { Message = errorMessage, Summary = "Logstash Exception" } }).ConfigureAwait(false);
                 if (ThrowOnError)
                 {
                     throw;
