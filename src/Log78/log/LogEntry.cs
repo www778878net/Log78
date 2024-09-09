@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Linq;
@@ -51,58 +52,65 @@ namespace www778878net.log
 
     public string ToJson()
     {
-        var jObject = new JObject();
+      var stringBuilder = new StringBuilder();
+      stringBuilder.Append("{");
 
-        // 处理 Basic 属性
-        if (Basic != null)
+      // 处理 Basic 属性
+      if (Basic != null)
+      {
+        foreach (var prop in Basic.GetType().GetProperties())
         {
-            foreach (var prop in Basic.GetType().GetProperties())
+          var value = prop.GetValue(Basic);
+          if (value != null)
+          {
+            stringBuilder.AppendFormat("\"{0}\":", prop.Name.ToLower());
+            if (prop.Name.ToLower() == "message" && value is not string)
             {
-                var value = prop.GetValue(Basic);
-                if (value != null)
-                {
-                    if (prop.Name.ToLower() == "message" && value is not string)
-                    {
-                        jObject[prop.Name.ToLower()] = JToken.FromObject(value);
-                    }
-                    else
-                    {
-                        jObject[prop.Name.ToLower()] = JToken.FromObject(value);
-                    }
-                }
+              stringBuilder.Append(JsonConvert.SerializeObject(value));
             }
-        }
-
-        // 处理其他属性（Event, Error, Http, Trace）
-        foreach (var prop in this.GetType().GetProperties())
-        {
-            if (prop.Name != "Basic" && prop.Name != "AdditionalProperties")
+            else
             {
-                var value = prop.GetValue(this);
-                if (value != null)
-                {
-                    foreach (var subProp in value.GetType().GetProperties())
-                    {
-                        var subValue = subProp.GetValue(value);
-                        if (subValue != null)
-                        {
-                            jObject[subProp.Name.ToLower()] = JToken.FromObject(subValue);
-                        }
-                    }
-                }
+              stringBuilder.Append(JsonConvert.SerializeObject(value));
             }
+            stringBuilder.Append(",");
+          }
         }
+      }
 
-        // 添加额外属性
-        foreach (var prop in AdditionalProperties.Properties())
+      // 处理其他属性（Event, Error, Http, Trace）
+      foreach (var prop in this.GetType().GetProperties())
+      {
+        if (prop.Name != "Basic" && prop.Name != "AdditionalProperties")
         {
-            jObject[prop.Name.ToLower()] = prop.Value;
+          var value = prop.GetValue(this);
+          if (value != null)
+          {
+            foreach (var subProp in value.GetType().GetProperties())
+            {
+              var subValue = subProp.GetValue(value);
+              if (subValue != null)
+              {
+                stringBuilder.AppendFormat("\"{0}\":{1},", subProp.Name.ToLower(), JsonConvert.SerializeObject(subValue));
+              }
+            }
+          }
         }
+      }
 
-        // 移除所有空对象
-        RemoveEmptyObjects(jObject);
+      // 添加额外属性
+      foreach (var prop in AdditionalProperties.Properties())
+      {
+        stringBuilder.AppendFormat("\"{0}\":{1},", prop.Name.ToLower(), prop.Value.ToString());
+      }
 
-        return jObject.ToString(Formatting.None);
+      // 移除最后一个逗号并添加结束括号
+      if (stringBuilder[stringBuilder.Length - 1] == ',')
+      {
+        stringBuilder.Length--;
+      }
+      stringBuilder.Append("}");
+
+      return stringBuilder.ToString();
     }
 
     private void RemoveEmptyObjects(JObject jObject)

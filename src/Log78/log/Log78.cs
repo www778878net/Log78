@@ -121,48 +121,62 @@ namespace www778878net.log
       customProperties[key] = value;
     }
 
+    private readonly object _lock = new object();
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+
     private async Task ProcessLogInternal(LogEntry? logEntry)
     {
-      if (logEntry?.Basic == null)
+      await _semaphore.WaitAsync();
+      try
       {
-        await ERROR(new LogEntry { Basic = new BasicInfo { Message = "Error: LogEntry or LogEntry.Basic is null" } });
-        return;
-      }
-
-      // 添加自定义属性到日志条目
-      foreach (var prop in customProperties)
-      {
-        logEntry.AddProperty(prop.Key, prop.Value);
-      }
-
-      // 始终写入详细日志，不管当前环境
-      debugFileLogger?.LogToFile(logEntry);
-
-      bool isdebug = IsDebugKey(logEntry);
-
-      if (isdebug || logEntry.Basic.LogLevelNumber >= LevelApi)
-      {
-        if (serverLogger != null)
+        if (logEntry?.Basic == null)
         {
-          try
+          await ERROR(new LogEntry { Basic = new BasicInfo { Message = "Error: LogEntry or LogEntry.Basic is null" } });
+          return;
+        }
+
+        lock (_lock)
+        {
+          // 添加自定义属性到日志条目
+          foreach (var prop in customProperties)
           {
-            await serverLogger.LogToServer(logEntry);
-          }
-          catch (Exception ex)
-          {
-            Console.WriteLine($"Error in server logging: {ex.Message}");
+            logEntry.AddProperty(prop.Key, prop.Value);
           }
         }
-      }
 
-      if (isdebug || logEntry.Basic.LogLevelNumber >= LevelFile)
-      {
-        fileLogger?.LogToFile(logEntry);
-      }
+        // 始终写入详细日志，不管当前环境
+        debugFileLogger?.LogToFile(logEntry);
 
-      if (isdebug || logEntry.Basic.LogLevelNumber >= LevelConsole)
+        bool isdebug = IsDebugKey(logEntry);
+
+        if (isdebug || logEntry.Basic.LogLevelNumber >= LevelApi)
+        {
+          if (serverLogger != null)
+          {
+            try
+            {
+              await serverLogger.LogToServer(logEntry);
+            }
+            catch (Exception ex)
+            {
+              Console.WriteLine($"Error in server logging: {ex.Message}");
+            }
+          }
+        }
+
+        if (isdebug || logEntry.Basic.LogLevelNumber >= LevelFile)
+        {
+          fileLogger?.LogToFile(logEntry);
+        }
+
+        if (isdebug || logEntry.Basic.LogLevelNumber >= LevelConsole)
+        {
+          consoleLogger?.WriteLine(logEntry);
+        }
+      }
+      finally
       {
-        consoleLogger?.WriteLine(logEntry);
+        _semaphore.Release();
       }
     }
 
@@ -335,7 +349,10 @@ namespace www778878net.log
 
     public void AddDebugKey(string key)
     {
+      lock (_lock)
+      {
         debugKind.Add(key.ToLower());
+      }
     }
   }
 }
