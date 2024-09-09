@@ -350,6 +350,62 @@ namespace Test78
             }
         }
 
+        [TestMethod]
+        public async Task TestCustomEntryLogging()
+        {
+            var logger = Log78.Instance;
+            logger.SetEnvironment(Log78.Environment.Development);
+            logger.SetupDetailFile();
+
+            // 创建扩展的日志条目
+            var extendedEntry = new customEntry
+            {
+                Basic = new BasicInfo
+                {
+                    Summary = "Custom log entry test",
+                    Message = "This is a custom log entry",
+                    LogLevel = "INFO",
+                    LogLevelNumber = 30
+                },
+                CustomField1 = "Custom Value",
+                CustomField2 = 42
+            };
+
+            Console.WriteLine("Before logging custom entry");
+            // 记录扩展的日志条目
+            await logger.INFO(extendedEntry);
+            Console.WriteLine("After logging custom entry");
+
+            // 验证详细日志文件存在并包含所有日志消息
+            string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "detail.log");
+            Assert.IsTrue(File.Exists(logPath), "Detail log file should exist");
+            string logContent = File.ReadAllText(logPath);
+            Console.WriteLine($"Log content: {logContent}");
+
+            // 解析日志内容
+            var logEntries = logContent.Split(new[] { "<AI_FOCUS_LOG>", "</AI_FOCUS_LOG>" }, StringSplitOptions.RemoveEmptyEntries)
+                                       .Where(json => !string.IsNullOrWhiteSpace(json))
+                                       .Select(json => JObject.Parse(json))
+                                       .ToList();
+
+            Assert.IsTrue(logEntries.Count > 0, "At least one log entry should be parsed");
+
+            // 验证扩展的日志条目
+            var customLogEntry = logEntries.LastOrDefault();
+            Assert.IsNotNull(customLogEntry, "Custom log entry should exist");
+            Console.WriteLine($"Parsed custom log entry: {customLogEntry}");
+            Assert.AreEqual("Custom log entry test", customLogEntry?["summary"]?.ToString(), "Summary should be correct");
+            Assert.AreEqual("This is a custom log entry", customLogEntry?["message"]?.ToString(), "Message should be correct");
+            Assert.AreEqual("Custom Value", customLogEntry?["customfield1"]?.ToString(), "CustomField1 should be included");
+            Assert.AreEqual("42", customLogEntry?["customfield2"]?.ToString(), "CustomField2 should be included");
+        }
+
         // ... (其他测试方法)
+    }
+
+    public class customEntry : LogEntry
+    {
+        public string CustomField1 { get; set; } = string.Empty;
+        public int CustomField2 { get; set; }
     }
 }

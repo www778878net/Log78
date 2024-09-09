@@ -50,80 +50,50 @@ namespace www778878net.log
     [JsonExtensionData]
     public JObject AdditionalProperties { get; set; } = new JObject();
 
-    public string ToJson()
+    public virtual string ToJson()
     {
-      var stringBuilder = new StringBuilder();
-      stringBuilder.Append("{");
-
-      // 处理 Basic 属性
-      if (Basic != null)
-      {
-        foreach (var prop in Basic.GetType().GetProperties())
-        {
-          var value = prop.GetValue(Basic);
-          if (value != null)
-          {
-            stringBuilder.AppendFormat("\"{0}\":", prop.Name.ToLower());
-            if (prop.Name.ToLower() == "message" && value is not string)
-            {
-              stringBuilder.Append(JsonConvert.SerializeObject(value));
-            }
-            else
-            {
-              stringBuilder.Append(JsonConvert.SerializeObject(value));
-            }
-            stringBuilder.Append(",");
-          }
-        }
-      }
-
-      // 处理其他属性（Event, Error, Http, Trace）
-      foreach (var prop in this.GetType().GetProperties())
-      {
-        if (prop.Name != "Basic" && prop.Name != "AdditionalProperties")
-        {
-          var value = prop.GetValue(this);
-          if (value != null)
-          {
-            foreach (var subProp in value.GetType().GetProperties())
-            {
-              var subValue = subProp.GetValue(value);
-              if (subValue != null)
-              {
-                stringBuilder.AppendFormat("\"{0}\":{1},", subProp.Name.ToLower(), JsonConvert.SerializeObject(subValue));
-              }
-            }
-          }
-        }
-      }
-
-      // 添加额外属性
-      foreach (var prop in AdditionalProperties.Properties())
-      {
-        stringBuilder.AppendFormat("\"{0}\":{1},", prop.Name.ToLower(), prop.Value.ToString());
-      }
-
-      // 移除最后一个逗号并添加结束括号
-      if (stringBuilder[stringBuilder.Length - 1] == ',')
-      {
-        stringBuilder.Length--;
-      }
-      stringBuilder.Append("}");
-
-      return stringBuilder.ToString();
+        var jObject = new JObject();
+        AddPropertiesToJObject(jObject);
+        return jObject.ToString(Formatting.None);
     }
 
-    private void RemoveEmptyObjects(JObject jObject)
+    protected virtual void AddPropertiesToJObject(JObject jObject)
     {
-      var propertiesToRemove = jObject.Properties()
-          .Where(p => p.Value.Type == JTokenType.Object && !((JObject)p.Value).Properties().Any())
-          .Select(p => p.Name)
-          .ToList();
+        foreach (var prop in this.GetType().GetProperties())
+        {
+            var value = prop.GetValue(this);
+            if (value != null && !string.IsNullOrWhiteSpace(value.ToString()))
+            {
+                if (prop.Name == "AdditionalProperties")
+                {
+                    continue;
+                }
+                
+                if (prop.Name == "Basic" && value is BasicInfo basicInfo)
+                {
+                    foreach (var basicProp in basicInfo.GetType().GetProperties())
+                    {
+                        var basicValue = basicProp.GetValue(basicInfo);
+                        if (basicValue != null && !string.IsNullOrWhiteSpace(basicValue.ToString()))
+                        {
+                            jObject[basicProp.Name.ToLower()] = JToken.FromObject(basicValue);
+                        }
+                    }
+                }
+                else
+                {
+                    jObject[prop.Name.ToLower()] = JToken.FromObject(value);
+                }
+            }
+        }
 
-      foreach (var propertyName in propertiesToRemove)
-      {
-        jObject.Remove(propertyName);
-      }
+        foreach (var prop in AdditionalProperties.Properties())
+        {
+            if (prop.Value != null && !string.IsNullOrWhiteSpace(prop.Value.ToString()))
+            {
+                jObject[prop.Name.ToLower()] = prop.Value;
+            }
+        }
     }
 
     public void AddProperty(string key, object value)
@@ -131,13 +101,7 @@ namespace www778878net.log
       AdditionalProperties[key] = JToken.FromObject(value);
     }
 
-    private class LowercaseContractResolver : DefaultContractResolver
-    {
-      protected override string ResolvePropertyName(string propertyName)
-      {
-        return propertyName.ToLower();
-      }
-    }
+     
   }
 
   public class BasicInfo
