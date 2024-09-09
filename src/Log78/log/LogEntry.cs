@@ -51,6 +51,14 @@ namespace www778878net.log
 
     public string ToJson()
     {
+         // 特殊处理 Message 属性
+      if (Basic.Message != null)
+      {
+        if (Basic.Message is not string )
+        { 
+          Basic.Message= JToken.FromObject(Basic.Message);
+        }
+      }
       var settings = new JsonSerializerSettings
       {
         NullValueHandling = NullValueHandling.Ignore,
@@ -59,6 +67,8 @@ namespace www778878net.log
 
       var json = JsonConvert.SerializeObject(this, settings);
       var jObject = JObject.Parse(json);
+
+   
 
       // 将所有嵌套属性提升到顶层
       FlattenObject(jObject);
@@ -152,7 +162,7 @@ namespace www778878net.log
     /// <summary>
     /// 主要的日志消息内容
     /// </summary>
-    public string? Message { get; set; }
+    public object? Message { get; set; }
 
     /// <summary>
     /// 产生日志的主机名

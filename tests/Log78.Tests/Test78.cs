@@ -89,23 +89,109 @@ namespace Test78
         {
             var originalLogger = Log78.Instance;
             originalLogger.SetEnvironment(Log78.Environment.Development);
-            var originalDebugEntry = new LogEntry { Basic = new BasicInfo { Message = "Original Debug Entry" } };
-            originalLogger.DebugEntry = originalDebugEntry;
 
             var clonedLogger = originalLogger.Clone();
 
             // 验证两个logger的设置是相同的
             Assert.AreEqual(originalLogger.CurrentEnvironment, clonedLogger.CurrentEnvironment);
             Assert.AreEqual(originalLogger.GetCurrentLevels(), clonedLogger.GetCurrentLevels());
-            
-            // 验证 DebugEntry 是共享的
-            Assert.AreSame(originalLogger.DebugEntry, clonedLogger.DebugEntry);
 
-            // 验证更改原始logger的DebugEntry也会影响克隆的logger
-            originalLogger.DebugEntry = new LogEntry { Basic = new BasicInfo { Message = "New Debug Entry" } };
-            Assert.AreSame(originalLogger.DebugEntry, clonedLogger.DebugEntry);
+            // 验证更改原始logger的设置不会影响克隆的logger
+            originalLogger.SetEnvironment(Log78.Environment.Production);
+            Assert.AreNotEqual(originalLogger.CurrentEnvironment, clonedLogger.CurrentEnvironment);
 
             await Task.CompletedTask;
+        }
+
+        [TestMethod]
+        public async Task TestDetailLogAlwaysWritten()
+        {
+            var logger = Log78.Instance;
+            logger.SetEnvironment(Log78.Environment.Production);
+            logger.SetupDetailFile();
+
+            var logEntry = new LogEntry
+            {
+                Basic = new BasicInfo
+                {
+                    Message = "Test detail log",
+                    LogLevel = "INFO",
+                    LogLevelNumber = 30
+                }
+            };
+
+            await logger.INFO(logEntry);
+
+            // 验证详细日志文件存在并包含日志条目
+            string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "detail.log");
+            Assert.IsTrue(File.Exists(logPath), "Detail log file should exist");
+            string logContent = File.ReadAllText(logPath);
+            Console.WriteLine($"Log content: {logContent}"); // 添加这行来输出日志内容
+            Assert.IsTrue(logContent.Contains("Test detail log"), "Detail log should contain the log message");
+        }
+
+        [TestMethod]
+        public async Task TestLogMethodOverloads()
+        {
+            var logger = Log78.Instance;
+            logger.SetEnvironment(Log78.Environment.Development);
+            logger.SetupDetailFile();
+
+            await logger.DETAIL("Detail summary", new { DetailInfo = "Some detail info" });
+            await logger.DEBUG("Debug summary", new { DebugInfo = "Some debug info" });
+            await logger.INFO("Info summary", new { InfoData = "Some info data" });
+            await logger.WARN("Warn summary", new { WarnCode = 123 });
+            await logger.ERROR("Error summary", new { ErrorCode = 500 });
+
+            try
+            {
+                throw new Exception("Test exception");
+            }
+            catch (Exception ex)
+            {
+                await logger.ERROR(ex, "Custom error summary");
+            }
+
+            // 验证详细日志文件存在并包含所有日志消息
+            string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "detail.log");
+            Assert.IsTrue(File.Exists(logPath), "Detail log file should exist");
+            string logContent = File.ReadAllText(logPath);
+            Console.WriteLine($"Log content: {logContent}");
+            Assert.IsTrue(logContent.Contains("Detail summary"), "Log should contain Detail summary");
+            Assert.IsTrue(logContent.Contains("Some detail info"), "Log should contain detail info");
+            Assert.IsTrue(logContent.Contains("Debug summary"), "Log should contain Debug summary");
+            Assert.IsTrue(logContent.Contains("Some debug info"), "Log should contain debug info");
+            Assert.IsTrue(logContent.Contains("Info summary"), "Log should contain Info summary");
+            Assert.IsTrue(logContent.Contains("Some info data"), "Log should contain info data");
+            Assert.IsTrue(logContent.Contains("Warn summary"), "Log should contain Warn summary");
+            Assert.IsTrue(logContent.Contains("123"), "Log should contain warn code");
+            Assert.IsTrue(logContent.Contains("Error summary"), "Log should contain Error summary");
+            Assert.IsTrue(logContent.Contains("500"), "Log should contain error code");
+            Assert.IsTrue(logContent.Contains("Custom error summary"), "Log should contain custom error summary");
+            Assert.IsTrue(logContent.Contains("Test exception"), "Log should contain exception message");
+        }
+
+        [TestMethod]
+        public async Task TestMessageSerialization()
+        {
+            var logger = Log78.Instance;
+            logger.SetEnvironment(Log78.Environment.Development);
+            logger.SetupDetailFile();
+
+            // 测试字符串消息
+            await logger.INFO("String message test", "This is a string message");
+
+            // 测试对象消息
+            await logger.INFO("Object message test", new { Key = "Value", Number = 123 });
+
+            // 验证详细日志文件存在并包含所有日志消息
+            string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "detail.log");
+            Assert.IsTrue(File.Exists(logPath), "Detail log file should exist");
+            string logContent = File.ReadAllText(logPath);
+            Console.WriteLine($"Log content: {logContent}");
+            
+            Assert.IsTrue(logContent.Contains("\"message\":\"This is a string message\""), "Log should contain the string message as-is");
+            Assert.IsTrue(logContent.Contains("\"message\":{\"key\":\"Value\",\"number\":123}"), "Log should contain the object message as JSON");
         }
 
         // ... (其他测试方法)

@@ -106,14 +106,7 @@ namespace www778878net.log
 
     public void SetupDetailFile()
     {
-      if (CurrentEnvironment == Environment.Development)
-      {
-        debugFileLogger = new FileLogDetail();
-      }
-      else
-      {
-        debugFileLogger = null;
-      }
+      debugFileLogger = new FileLogDetail();
     }
 
     public void ClearDetailLog()
@@ -128,6 +121,9 @@ namespace www778878net.log
         await ERROR(new LogEntry { Basic = new BasicInfo { Message = "Error: LogEntry or LogEntry.Basic is null" } });
         return;
       }
+
+      // 始终写入详细日志，不管当前环境
+      debugFileLogger?.LogToFile(logEntry);
 
       bool isdebug = IsDebugKey(logEntry);
 
@@ -144,11 +140,6 @@ namespace www778878net.log
             Console.WriteLine($"Error in server logging: {ex.Message}");
           }
         }
-      }
-
-      if (CurrentEnvironment == Environment.Development && debugFileLogger != null)
-      {
-        debugFileLogger.LogToFile(logEntry);
       }
 
       if (isdebug || logEntry.Basic.LogLevelNumber >= LevelFile)
@@ -195,6 +186,72 @@ namespace www778878net.log
       return keysToCheck.Any(key => key != null && debugKind.Contains(key.ToLower()));
     }
 
+    public async Task DETAIL(string summary, object? message = null, int level = 10)
+    {
+      await DETAIL(new LogEntry { Basic = new BasicInfo { Summary = summary, Message = message, LogLevelNumber = level } });
+    }
+
+    public async Task DEBUG(string summary, object? message = null, int level = 20)
+    {
+      await DEBUG(new LogEntry { Basic = new BasicInfo { Summary = summary, Message = message, LogLevelNumber = level } });
+    }
+
+    public async Task INFO(string summary, object? message = null, int level = 30)
+    {
+      await INFO(new LogEntry { Basic = new BasicInfo { Summary = summary, Message = message, LogLevelNumber = level } });
+    }
+
+    public async Task WARN(string summary, object? message = null, int level = 50)
+    {
+      await WARN(new LogEntry { Basic = new BasicInfo { Summary = summary, Message = message, LogLevelNumber = level } });
+    }
+
+    public async Task ERROR(string summary, object? message = null, int level = 60)
+    {
+      await ERROR(new LogEntry { Basic = new BasicInfo { Summary = summary, Message = message, LogLevelNumber = level } });
+    }
+
+    public async Task ERROR(Exception error, string? summary = null, int level = 60)
+    {
+      var logEntry = new LogEntry 
+      { 
+        Basic = new BasicInfo { Summary = summary ?? error.Message, LogLevelNumber = level },
+        Error = new ErrorInfo 
+        { 
+          ErrorType = error.GetType().FullName,
+          ErrorMessage = error.Message,
+          ErrorStackTrace = error.StackTrace
+        }
+      };
+      await ERROR(logEntry);
+    }
+
+    public async Task ERROR(Exception error, LogEntry logEntry, int level = 60)
+    {
+      logEntry.Basic.LogLevel = "ERROR";
+      logEntry.Basic.LogLevelNumber = level;
+
+      logEntry.Error.ErrorType = error.GetType().FullName;
+      logEntry.Error.ErrorMessage = error.Message;
+      logEntry.Error.ErrorStackTrace = error.StackTrace;
+
+      if (string.IsNullOrEmpty(logEntry.Basic.Summary))
+      {
+        logEntry.Basic.Summary = error.Message;
+      }
+
+      if (logEntry.Basic.Message == null)
+      {
+        logEntry.Basic.Message = $"{error.GetType().Name}: {error.Message}";
+      }
+      else if (logEntry.Basic.Message is string messageString && string.IsNullOrEmpty(messageString))
+      {
+        logEntry.Basic.Message = $"{error.GetType().Name}: {error.Message}";
+      }
+
+      await ProcessLogInternal(logEntry);
+    }
+
     public async Task DETAIL(LogEntry logEntry, int level = 10)
     {
       logEntry.Basic.LogLevel = "DETAIL";
@@ -227,28 +284,6 @@ namespace www778878net.log
     {
       logEntry.Basic.LogLevel = "ERROR";
       logEntry.Basic.LogLevelNumber = level;
-      await ProcessLogInternal(logEntry);
-    }
-
-    public async Task ERROR(Exception error, LogEntry logEntry, int level = 60)
-    {
-      logEntry.Basic.LogLevel = "ERROR";
-      logEntry.Basic.LogLevelNumber = level;
-
-      logEntry.Error.ErrorType = error.GetType().FullName;
-      logEntry.Error.ErrorMessage = error.Message;
-      logEntry.Error.ErrorStackTrace = error.StackTrace;
-
-      if (string.IsNullOrEmpty(logEntry.Basic.Summary))
-      {
-        logEntry.Basic.Summary = error.Message;
-      }
-
-      if (string.IsNullOrEmpty(logEntry.Basic.Message))
-      {
-        logEntry.Basic.Message = $"{error.GetType().Name}: {error.Message}";
-      }
-
       await ProcessLogInternal(logEntry);
     }
 
