@@ -333,16 +333,6 @@ namespace www778878net.log
       Testing
     }
 
-    public void AddDebugCondition(string key, object value)
-    {
-        if (DebugEntry == null)
-        {
-            DebugEntry = new LogEntry();
-        }
-        DebugEntry.Basic.Message = DebugEntry.Basic.Message ?? new Dictionary<string, object>();
-        ((Dictionary<string, object>)DebugEntry.Basic.Message)[key] = value;
-    }
-
     public void AddDebugKey(string key)
     {
         debugKind.Add(key.ToLower());
