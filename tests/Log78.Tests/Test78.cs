@@ -18,6 +18,9 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO;
+using Newtonsoft.Json.Linq;
+using System.Linq;
+using Newtonsoft.Json;
 
 namespace Test78
 {
@@ -190,8 +193,64 @@ namespace Test78
             string logContent = File.ReadAllText(logPath);
             Console.WriteLine($"Log content: {logContent}");
             
-            Assert.IsTrue(logContent.Contains("\"message\":\"This is a string message\""), "Log should contain the string message as-is");
-            Assert.IsTrue(logContent.Contains("\"message\":{\"key\":\"Value\",\"number\":123}"), "Log should contain the object message as JSON");
+            // 解析日志内容
+            var logEntries = logContent.Split(new[] { "<AI_FOCUS_LOG>", "</AI_FOCUS_LOG>" }, StringSplitOptions.RemoveEmptyEntries)
+                                       .Where(json => !string.IsNullOrWhiteSpace(json))
+                                       .Select(json => JObject.Parse(json))
+                                       .ToList();
+
+            Assert.IsTrue(logEntries.Count > 0, "At least one log entry should be parsed");
+
+            // 验证字符串消息
+            var stringMessageEntry = logEntries.FirstOrDefault(e => e["summary"]?.ToString() == "String message test");
+            Assert.IsNotNull(stringMessageEntry, "String message entry should exist");
+            Assert.AreEqual("This is a string message", stringMessageEntry["message"]?.ToString(), "String message should be correct");
+
+            // 验证对象消息
+            var objectMessageEntry = logEntries.FirstOrDefault(e => e["summary"]?.ToString() == "Object message test");
+            Assert.IsNotNull(objectMessageEntry, "Object message entry should exist");
+            Assert.IsTrue(objectMessageEntry["message"] is JObject, "Object message should be a JSON object");
+            var messageObject = objectMessageEntry["message"] as JObject;
+            Assert.IsNotNull(messageObject, "Message object should not be null");
+            Assert.AreEqual("Value", messageObject["Key"]?.ToString(), "Object message should contain correct key");
+            Assert.AreEqual("123", messageObject["Number"]?.ToString(), "Object message should contain correct number");
+        }
+
+        [TestMethod]
+        public async Task TestDynamicLogLevelAdjustment()
+        {
+            var logger = Log78.Instance;
+            logger.SetEnvironment(Log78.Environment.Development);
+            logger.SetupDetailFile();
+
+            // 设置自定义日志级别
+            logger.SetupLevel(40, 50, 60);
+
+            // 测试不同级别的日志
+            await logger.DETAIL("Detail message", new { Level = "DETAIL" });
+            await logger.DEBUG("Debug message", new { Level = "DEBUG" });
+            await logger.INFO("Info message", new { Level = "INFO" });
+            await logger.WARN("Warn message", new { Level = "WARN" });
+            await logger.ERROR("Error message", new { Level = "ERROR" });
+
+            // 验证详细日志文件存在并包含所有日志消息
+            string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "detail.log");
+            Assert.IsTrue(File.Exists(logPath), "Detail log file should exist");
+            string logContent = File.ReadAllText(logPath);
+            Console.WriteLine($"Log content: {logContent}");
+
+            // 验证日志级别设置是否生效
+            Assert.IsTrue(logContent.Contains("Detail message"), "Log should contain Detail message");
+            Assert.IsTrue(logContent.Contains("Debug message"), "Log should contain Debug message");
+            Assert.IsTrue(logContent.Contains("Info message"), "Log should contain Info message");
+            Assert.IsTrue(logContent.Contains("Warn message"), "Log should contain Warn message");
+            Assert.IsTrue(logContent.Contains("Error message"), "Log should contain Error message");
+
+            // 验证日志级别
+            var (fileLevel, consoleLevel, apiLevel) = logger.GetCurrentLevels();
+            Assert.AreEqual(40, fileLevel, "File log level should be 40");
+            Assert.AreEqual(50, consoleLevel, "Console log level should be 50");
+            Assert.AreEqual(60, apiLevel, "API log level should be 60");
         }
 
         // ... (其他测试方法)

@@ -24,7 +24,7 @@ namespace www778878net.log
         {
             try
             {
-                string logString = "<AI_FOCUS_LOG>" + JsonConvert.SerializeObject(logEntry) + "</AI_FOCUS_LOG>\n";
+                string logString = "<AI_FOCUS_LOG>" + logEntry.ToJson() + "</AI_FOCUS_LOG>\n";
                 lock (fileLock)
                 {
                     File.AppendAllText(filePath, logString);

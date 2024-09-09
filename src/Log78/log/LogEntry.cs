@@ -51,61 +51,58 @@ namespace www778878net.log
 
     public string ToJson()
     {
-         // 特殊处理 Message 属性
-      if (Basic.Message != null)
-      {
-        if (Basic.Message is not string )
-        { 
-          Basic.Message= JToken.FromObject(Basic.Message);
-        }
-      }
-      var settings = new JsonSerializerSettings
-      {
-        NullValueHandling = NullValueHandling.Ignore,
-        ContractResolver = new LowercaseContractResolver()
-      };
+        var jObject = new JObject();
 
-      var json = JsonConvert.SerializeObject(this, settings);
-      var jObject = JObject.Parse(json);
-
-   
-
-      // 将所有嵌套属性提升到顶层
-      FlattenObject(jObject);
-
-      // 移除所有空对象
-      RemoveEmptyObjects(jObject);
-
-      return jObject.ToString(Formatting.None);
-    }
-
-    private void FlattenObject(JObject jObject)
-    {
-      var propertiesToAdd = new JObject();
-      var propertiesToRemove = new System.Collections.Generic.List<string>();
-
-      foreach (var property in jObject.Properties())
-      {
-        if (property.Value.Type == JTokenType.Object)
+        // 处理 Basic 属性
+        if (Basic != null)
         {
-          var nestedObject = (JObject)property.Value;
-          foreach (var nestedProperty in nestedObject.Properties())
-          {
-            propertiesToAdd.Add(nestedProperty.Name, nestedProperty.Value);
-          }
-          propertiesToRemove.Add(property.Name);
+            foreach (var prop in Basic.GetType().GetProperties())
+            {
+                var value = prop.GetValue(Basic);
+                if (value != null)
+                {
+                    if (prop.Name.ToLower() == "message" && value is not string)
+                    {
+                        jObject[prop.Name.ToLower()] = JToken.FromObject(value);
+                    }
+                    else
+                    {
+                        jObject[prop.Name.ToLower()] = JToken.FromObject(value);
+                    }
+                }
+            }
         }
-      }
 
-      foreach (var propertyName in propertiesToRemove)
-      {
-        jObject.Remove(propertyName);
-      }
+        // 处理其他属性（Event, Error, Http, Trace）
+        foreach (var prop in this.GetType().GetProperties())
+        {
+            if (prop.Name != "Basic" && prop.Name != "AdditionalProperties")
+            {
+                var value = prop.GetValue(this);
+                if (value != null)
+                {
+                    foreach (var subProp in value.GetType().GetProperties())
+                    {
+                        var subValue = subProp.GetValue(value);
+                        if (subValue != null)
+                        {
+                            jObject[subProp.Name.ToLower()] = JToken.FromObject(subValue);
+                        }
+                    }
+                }
+            }
+        }
 
-      foreach (var property in propertiesToAdd.Properties())
-      {
-        jObject.Add(property.Name, property.Value);
-      }
+        // 添加额外属性
+        foreach (var prop in AdditionalProperties.Properties())
+        {
+            jObject[prop.Name.ToLower()] = prop.Value;
+        }
+
+        // 移除所有空对象
+        RemoveEmptyObjects(jObject);
+
+        return jObject.ToString(Formatting.None);
     }
 
     private void RemoveEmptyObjects(JObject jObject)
