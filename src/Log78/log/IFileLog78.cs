@@ -22,5 +22,6 @@ namespace www778878net.log
     {        
        
         void LogToFile(LogEntry logEntry);
+        void Clear();
     }
 }

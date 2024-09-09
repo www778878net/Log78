@@ -24,7 +24,7 @@ namespace Test78
     [TestClass]
     public class Log78Tests
     {
-        private static Log78 logger;
+        private static Log78? logger;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -37,15 +37,24 @@ namespace Test78
         [TestMethod]
         public async Task TestEnvironmentSettings()
         {
-            logger.SetEnvironment(Environment.Development);
+            logger?.SetEnvironment(Log78.Environment.Development);
             // ... (其余测试代码)
-            await Task.CompletedTask; // 添加这行以使方法成为真正的异步方法
+            await Task.CompletedTask;
         }
 
         [TestMethod]
         public async Task TestLogLevels()
         {
-            await logger.Debug("Debug message");
+            var logEntry = new LogEntry
+            {
+                Basic = new BasicInfo
+                {
+                    Message = "Debug message",
+                    LogLevel = "DEBUG",
+                    LogLevelNumber = 20
+                }
+            };
+            await logger!.DEBUG(logEntry);
             // ... (其余测试代码)
         }
 
@@ -54,10 +63,16 @@ namespace Test78
         {
             var customEntry = new LogEntry
             {
-                // ... (设置 LogEntry 属性)
+                Basic = new BasicInfo
+                {
+                    Message = "Custom log entry",
+                    LogLevel = "INFO",
+                    LogLevelNumber = 30
+                }
+                // ... (设置其他 LogEntry 属性)
             };
 
-            await logger.InfoEntry(customEntry);
+            await logger!.INFO(customEntry);
             // ... (其余测试代码)
         }
 
@@ -66,7 +81,31 @@ namespace Test78
         {
             var serverLog = new LogstashServerLog78("http://example.com", 50);
             // ... (其余测试代码)
-            await Task.CompletedTask; // 添加这行以使方法成为真正的异步方法
+            await Task.CompletedTask;
+        }
+
+        [TestMethod]
+        public async Task TestClone()
+        {
+            var originalLogger = Log78.Instance;
+            originalLogger.SetEnvironment(Log78.Environment.Development);
+            var originalDebugEntry = new LogEntry { Basic = new BasicInfo { Message = "Original Debug Entry" } };
+            originalLogger.DebugEntry = originalDebugEntry;
+
+            var clonedLogger = originalLogger.Clone();
+
+            // 验证两个logger的设置是相同的
+            Assert.AreEqual(originalLogger.CurrentEnvironment, clonedLogger.CurrentEnvironment);
+            Assert.AreEqual(originalLogger.GetCurrentLevels(), clonedLogger.GetCurrentLevels());
+            
+            // 验证 DebugEntry 是共享的
+            Assert.AreSame(originalLogger.DebugEntry, clonedLogger.DebugEntry);
+
+            // 验证更改原始logger的DebugEntry也会影响克隆的logger
+            originalLogger.DebugEntry = new LogEntry { Basic = new BasicInfo { Message = "New Debug Entry" } };
+            Assert.AreSame(originalLogger.DebugEntry, clonedLogger.DebugEntry);
+
+            await Task.CompletedTask;
         }
 
         // ... (其他测试方法)

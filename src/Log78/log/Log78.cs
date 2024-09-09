@@ -116,6 +116,11 @@ namespace www778878net.log
       }
     }
 
+    public void ClearDetailLog()
+    {
+      debugFileLogger?.Clear();
+    }
+
     private async Task ProcessLogInternal(LogEntry? logEntry)
     {
       if (logEntry?.Basic == null)
@@ -257,6 +262,20 @@ namespace www778878net.log
     public (int FileLevel, int ConsoleLevel, int ApiLevel) GetCurrentLevels()
     {
       return (LevelFile, LevelConsole, LevelApi);
+    }
+
+    public Log78 Clone()
+    {
+        var cloned = new Log78();
+        cloned.serverLogger = this.serverLogger;
+        cloned.fileLogger = this.fileLogger;
+        cloned.consoleLogger = this.consoleLogger;
+        cloned.LevelApi = this.LevelApi;
+        cloned.LevelConsole = this.LevelConsole;
+        cloned.LevelFile = this.LevelFile;
+        cloned.CurrentEnvironment = this.CurrentEnvironment;
+    
+        return cloned;
     }
 
     public enum Environment

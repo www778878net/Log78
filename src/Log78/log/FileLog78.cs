@@ -39,5 +39,10 @@ namespace www778878net.log
         {
             _logger?.Dispose();
         }
+
+    public void Clear()
+    {
+       
     }
+  }
 }
