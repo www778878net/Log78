@@ -1,40 +1,52 @@
 using System;
 using System.IO;
-using Serilog;
-using Serilog.Core;
+using Newtonsoft.Json;
+using www778878net.log;
 
 namespace www778878net.log
 {
-    public class FileLogDetail : IFileLog78, IDisposable
+    public class FileLogDetail : IFileLog78
     {
-        private readonly string _logFileName;
-        private readonly Logger _logger;
+        private string filePath;
+        private static readonly object fileLock = new object();
 
-        public FileLogDetail()
+        public FileLogDetail(string filename = "detail.log", string menu = "logs", bool clearOnCreate = true)
         {
-            string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
-            Directory.CreateDirectory(logDirectory);
-            _logFileName = Path.Combine(logDirectory, "detail.log");
-
-            // 清空文件
-            File.WriteAllText(_logFileName, string.Empty);
-
-            _logger = new LoggerConfiguration()
-                .WriteTo.File(_logFileName, rollingInterval: RollingInterval.Infinite)
-                .CreateLogger();
-
-            Console.WriteLine($"Detail log file created at: {_logFileName}");
+            filePath = Path.Combine(menu, filename);
+            Directory.CreateDirectory(menu);
+            if (clearOnCreate)
+            {
+                Clear();
+            }
         }
 
         public void LogToFile(LogEntry logEntry)
         {
-            _logger.Information(logEntry.ToJson());
-            Console.WriteLine($"Logged to detail file: {_logFileName}");
+            try
+            {
+                string logString = "<AI_FOCUS_LOG>" + JsonConvert.SerializeObject(logEntry) + "</AI_FOCUS_LOG>\n";
+                lock (fileLock)
+                {
+                    File.AppendAllText(filePath, logString);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"写入详细日志文件时出错: {ex}");
+            }
         }
 
-        public void Dispose()
+        public void Clear()
         {
-            _logger?.Dispose();
+            lock (fileLock)
+            {
+                File.WriteAllText(filePath, string.Empty);
+            }
+        }
+
+        public void Close()
+        {
+            // 不需要特别的关闭操作
         }
     }
 }
