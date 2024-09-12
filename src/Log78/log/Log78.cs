@@ -43,6 +43,13 @@ namespace www778878net.log
       SetEnvironmentFromEnvVar();
     }
 
+    // 添加一个新的构造函数，用于依赖注入
+    public Log78(IServerLog78? serverLogger, IFileLog78? fileLogger, IConsoleLog78? consoleLogger)
+    {
+        SetEnvironmentFromEnvVar();
+        setup(serverLogger, fileLogger, consoleLogger);
+    }
+
     private void SetEnvironmentFromEnvVar()
     {
       string? envVar = System.Environment.GetEnvironmentVariable("LOG78_ENVIRONMENT");
