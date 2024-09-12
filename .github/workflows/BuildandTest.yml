@@ -18,12 +18,12 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0 
 
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '8.0.x'
 
@@ -50,11 +50,10 @@ jobs:
       with:
         files: './tests/TestResults/*.trx'
 
-    - name: Pack project for .NET Framework 4.8
-      run: dotnet pack ./src/Log78/Log78.csproj -c Release -p:TargetFramework=net48 --output ./artifacts --include-symbols
+    - name: Pack project for netstandard2.0
+      run: dotnet pack ./src/Log78/Log78.csproj -c Release -p:TargetFramework=netstandard2.0 --output ./artifacts --include-symbols
 
-    - name: Pack project for .NET 6.0
-      run: dotnet pack ./src/Log78/Log78.csproj -c Release -p:TargetFramework=net6.0 --output ./artifacts --include-symbols
+    # 删除或注释掉 .NET Framework 4.8 和 .NET 6.0 的打包步骤
 
     - name: Publish to NuGet
       run: |
