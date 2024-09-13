@@ -31,7 +31,8 @@ Log78 is a powerful and easy-to-use logging library for .NET applications. Key f
 - Support for both .NET Framework and .NET Core
 Ideal for projects requiring a simple yet robust logging solution.
     </Description>
-    <Platforms>AnyCPU;x64</Platforms>
+    <Platforms>AnyCPU;AnyCPU</Platforms>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\README.md">

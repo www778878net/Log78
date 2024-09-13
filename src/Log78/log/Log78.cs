@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace www778878net.log
 {
-  public class Log78
+  public class Log78:ILog78
   {
     private HashSet<string> debugKind = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     private int LevelFile { get; set; } = 30;
@@ -77,17 +77,17 @@ namespace www778878net.log
         case Environment.Production:
           LevelConsole = 60; // ERROR
           LevelFile = 30;    // INFO
-          LevelApi = 50;     // WARN
+          LevelApi = 30;     // INFO
           break;
         case Environment.Development:
           LevelConsole = 20; // DEBUG
           LevelFile = 20;    // DEBUG
-          LevelApi = 50;     // WARN
+          LevelApi = 30;     // INFO
           break;
         case Environment.Testing:
           LevelConsole = 60; // ERROR
           LevelFile = 20;    // DEBUG
-          LevelApi = 50;     // WARN
+          LevelApi = 30;     // INFO
           break;
       }
     }
