@@ -32,7 +32,7 @@ namespace www778878net.log
         if (instance == null)
         {
           instance = new Log78();
-          instance.setup(null, new FileLog78(), new ConsoleLog78());
+          instance.Setup(null, new FileLog78(), new ConsoleLog78());
         }
         return instance;
       }
@@ -47,7 +47,7 @@ namespace www778878net.log
     public Log78(IServerLog78? serverLogger, IFileLog78? fileLogger, IConsoleLog78? consoleLogger)
     {
         SetEnvironmentFromEnvVar();
-        setup(serverLogger, fileLogger, consoleLogger);
+        Setup(serverLogger, fileLogger, consoleLogger);
     }
 
     private void SetEnvironmentFromEnvVar()
@@ -104,7 +104,7 @@ namespace www778878net.log
       }
     }
 
-    public void setup(IServerLog78? serverLogger, IFileLog78? fileLogger, IConsoleLog78? consoleLogger)
+    public void Setup(IServerLog78? serverLogger, IFileLog78? fileLogger, IConsoleLog78? consoleLogger)
     {
       this.serverLogger = serverLogger;
       this.fileLogger = fileLogger ?? this.fileLogger;
