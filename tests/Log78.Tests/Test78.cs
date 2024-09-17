@@ -357,7 +357,7 @@ namespace Test78
             logger.SetEnvironment(Log78.Environment.Development);
             logger.SetupDetailFile();
 
-            // 创建扩展的日志条目
+            // 创建扩展的日志条目，包含空的 HttpInfo
             var extendedEntry = new customEntry
             {
                 Basic = new BasicInfo
@@ -368,21 +368,19 @@ namespace Test78
                     LogLevelNumber = 30
                 },
                 CustomField1 = "Custom Value",
-                CustomField2 = 42
+                CustomField2 = 42,
+                Http = new HttpInfo() // 空的 HttpInfo
             };
 
             Console.WriteLine("Before logging custom entry");
-            // 记录扩展的日志条目
             await logger.INFO(extendedEntry);
             Console.WriteLine("After logging custom entry");
 
-            // 验证详细日志文件存在并包含所有日志消息
             string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "detail.log");
             Assert.IsTrue(File.Exists(logPath), "Detail log file should exist");
             string logContent = File.ReadAllText(logPath);
             Console.WriteLine($"Log content: {logContent}");
 
-            // 解析日志内容
             var logEntries = logContent.Split(new[] { "<AI_FOCUS_LOG>", "</AI_FOCUS_LOG>" }, StringSplitOptions.RemoveEmptyEntries)
                                        .Where(json => !string.IsNullOrWhiteSpace(json))
                                        .Select(json => JObject.Parse(json))
@@ -390,14 +388,19 @@ namespace Test78
 
             Assert.IsTrue(logEntries.Count > 0, "At least one log entry should be parsed");
 
-            // 验证扩展的日志条目
             var customLogEntry = logEntries.LastOrDefault();
             Assert.IsNotNull(customLogEntry, "Custom log entry should exist");
             Console.WriteLine($"Parsed custom log entry: {customLogEntry}");
             Assert.AreEqual("Custom log entry test", customLogEntry?["summary"]?.ToString(), "Summary should be correct");
             Assert.AreEqual("This is a custom log entry", customLogEntry?["message"]?.ToString(), "Message should be correct");
             Assert.AreEqual("Custom Value", customLogEntry?["customfield1"]?.ToString(), "CustomField1 should be included");
-            Assert.AreEqual("42", customLogEntry?["customfield2"]?.ToString(), "CustomField2 should be included");
+            Assert.AreEqual(42, customLogEntry?["customfield2"]?.Value<int>(), "CustomField2 should be included");
+            
+            // 验证空的 HttpInfo 的属性不存在
+            Assert.IsFalse(customLogEntry.ContainsKey("httprequestmethod"), "Empty HttpRequestMethod should not be included");
+            Assert.IsFalse(customLogEntry.ContainsKey("httprequestbodycontent"), "Empty HttpRequestBodyContent should not be included");
+            Assert.IsFalse(customLogEntry.ContainsKey("httpresponsestatuscode"), "Empty HttpResponseStatusCode should not be included");
+            Assert.IsFalse(customLogEntry.ContainsKey("urloriginal"), "Empty UrlOriginal should not be included");
         }
 
         // ... (其他测试方法)

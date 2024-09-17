@@ -59,39 +59,36 @@ namespace www778878net.log
 
     protected virtual void AddPropertiesToJObject(JObject jObject)
     {
+        AddComplexTypeToJObject(jObject, Basic);
+        AddComplexTypeToJObject(jObject, Event);
+        AddComplexTypeToJObject(jObject, Error);
+        AddComplexTypeToJObject(jObject, Http);
+        AddComplexTypeToJObject(jObject, Trace);
+
+        // 处理自定义字段
         foreach (var prop in this.GetType().GetProperties())
         {
-            var value = prop.GetValue(this);
-            if (value != null && !string.IsNullOrWhiteSpace(value.ToString()))
+            if (prop.Name != nameof(Basic) && 
+                prop.Name != nameof(Event) && 
+                prop.Name != nameof(Error) && 
+                prop.Name != nameof(Http) && 
+                prop.Name != nameof(Trace) && 
+                prop.Name != nameof(AdditionalProperties))
             {
-                if (prop.Name == "AdditionalProperties")
-                {
-                    continue;
-                }
-                
-                if (prop.Name == "Basic" && value is BasicInfo basicInfo)
-                {
-                    foreach (var basicProp in basicInfo.GetType().GetProperties())
-                    {
-                        var basicValue = basicProp.GetValue(basicInfo);
-                        if (basicValue != null && !string.IsNullOrWhiteSpace(basicValue.ToString()))
-                        {
-                            jObject[basicProp.Name.ToLower()] = JToken.FromObject(basicValue);
-                        }
-                    }
-                }
-                else
+                var value = prop.GetValue(this);
+                if (value != null && !string.IsNullOrWhiteSpace(value.ToString()))
                 {
                     jObject[prop.Name.ToLower()] = JToken.FromObject(value);
                 }
             }
         }
 
-        foreach (var prop in AdditionalProperties.Properties())
+        // 处理 AdditionalProperties
+        foreach (var prop in AdditionalProperties)
         {
             if (prop.Value != null && !string.IsNullOrWhiteSpace(prop.Value.ToString()))
             {
-                jObject[prop.Name.ToLower()] = prop.Value;
+                jObject[prop.Key.ToLower()] = prop.Value;
             }
         }
     }
@@ -101,7 +98,19 @@ namespace www778878net.log
       AdditionalProperties[key] = JToken.FromObject(value);
     }
 
-     
+    private void AddComplexTypeToJObject(JObject jObject, object complexType)
+    {
+        if (complexType == null) return;
+
+        foreach (var prop in complexType.GetType().GetProperties())
+        {
+            var value = prop.GetValue(complexType);
+            if (value != null && !string.IsNullOrWhiteSpace(value.ToString()))
+            {
+                jObject[prop.Name.ToLower()] = JToken.FromObject(value);
+            }
+        }
+    }
   }
 
   public class BasicInfo
