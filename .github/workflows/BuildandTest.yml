@@ -38,9 +38,9 @@ jobs:
 
     - name: Run tests
       run: |
-        dotnet test ./tests/Log78.Tests/test.csproj --configuration Release --no-build --logger "trx;LogFileName=testresults.trx" --results-directory ./tests/TestResults
+        dotnet test ./tests/Log78.Tests/Test.csproj --configuration Release --no-build --logger "trx;LogFileName=testresults.trx" --results-directory ./tests/TestResults
         if [ $? -ne 0 ]; then
-          dotnet test ./tests/Log78.Tests/test.csproj --help
+          dotnet test ./tests/Log78.Tests/Test.csproj --help
           exit 1
         fi
 
