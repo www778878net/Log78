@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace www778878net.log
 {
-  public class Log78
+  public class Log78:ILog78
   {
     private HashSet<string> debugKind = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     private int LevelFile { get; set; } = 30;
@@ -32,7 +32,7 @@ namespace www778878net.log
         if (instance == null)
         {
           instance = new Log78();
-          instance.setup(null, new FileLog78(), new ConsoleLog78());
+          instance.Setup(null, new FileLog78(), new ConsoleLog78());
         }
         return instance;
       }
@@ -47,7 +47,7 @@ namespace www778878net.log
     public Log78(IServerLog78? serverLogger, IFileLog78? fileLogger, IConsoleLog78? consoleLogger)
     {
         SetEnvironmentFromEnvVar();
-        setup(serverLogger, fileLogger, consoleLogger);
+        Setup(serverLogger, fileLogger, consoleLogger);
     }
 
     private void SetEnvironmentFromEnvVar()
@@ -77,17 +77,17 @@ namespace www778878net.log
         case Environment.Production:
           LevelConsole = 60; // ERROR
           LevelFile = 30;    // INFO
-          LevelApi = 50;     // WARN
+          LevelApi = 30;     // INFO
           break;
         case Environment.Development:
           LevelConsole = 20; // DEBUG
           LevelFile = 20;    // DEBUG
-          LevelApi = 50;     // WARN
+          LevelApi = 30;     // INFO
           break;
         case Environment.Testing:
           LevelConsole = 60; // ERROR
           LevelFile = 20;    // DEBUG
-          LevelApi = 50;     // WARN
+          LevelApi = 30;     // INFO
           break;
       }
     }
@@ -104,7 +104,7 @@ namespace www778878net.log
       }
     }
 
-    public void setup(IServerLog78? serverLogger, IFileLog78? fileLogger, IConsoleLog78? consoleLogger)
+    public void Setup(IServerLog78? serverLogger, IFileLog78? fileLogger, IConsoleLog78? consoleLogger)
     {
       this.serverLogger = serverLogger;
       this.fileLogger = fileLogger ?? this.fileLogger;
