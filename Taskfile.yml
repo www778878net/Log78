@@ -1,0 +1,24 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - dotnet build
+    desc: "Build the project"
+
+  install:
+    cmds:
+      - dotnet restore
+    desc: "Restore the project dependencies"
+
+  setup:
+    cmds:
+      - dotnet restore
+      - dotnet build
+    desc: "Setup the project"
+
+  publish:
+    cmds:
+      - powershell -Command ".\hooks\release.bat"
+    desc: "Publish the project and create a Git tag"
+
